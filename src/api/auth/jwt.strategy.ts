@@ -52,7 +52,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 				}
 			}
 		}
-		console.log('strategy ',payload.id);
+		console.log('strategy ', payload.id);
 
 		return payload;
 	}
