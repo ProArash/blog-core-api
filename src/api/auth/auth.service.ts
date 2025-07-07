@@ -24,7 +24,7 @@ export class AuthService {
 				username: authDto.username,
 			},
 		});
-		if (user) throw new BadRequestException('Duplicate username.');
+		if (user) throw new BadRequestException('نام کاربری تکراری است');
 		const hashPwd = await bcrypt.hash(authDto.password, 10);
 		return await this.userRepo
 			.create({
@@ -44,7 +44,7 @@ export class AuthService {
 		});
 		console.log(user);
 
-		if (!user) throw new BadRequestException('User not found.');
+		if (!user) throw new BadRequestException('کاربر یافت نشد');
 		return user;
 	}
 
@@ -55,11 +55,11 @@ export class AuthService {
 			},
 			select: ['id', 'username', 'password', 'roles'],
 		});
-		if (!user) throw new BadRequestException('Username not found.');
+		if (!user) throw new BadRequestException('نام کاربری یافت نشد');
 
 		const authResult = await bcrypt.compare(authDto.password, user.password);
 
-		if (!authResult) throw new BadRequestException('Invalid password.');
+		if (!authResult) throw new BadRequestException('رمز اشتباه است');
 
 		const payload: UserPayload = {
 			id: user.id,

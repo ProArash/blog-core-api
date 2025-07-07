@@ -42,13 +42,13 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 						req.res?.setHeader('access_token', newAt);
 					} catch (error) {
 						if (error instanceof TokenExpiredError)
-							throw new UnauthorizedException('refresh token is expired.');
+							throw new UnauthorizedException('رفرش توکن اکسپایر شده');
 						else {
 							throw new UnauthorizedException(error);
 						}
 					}
 				} else {
-					throw new UnauthorizedException('Invalid token.');
+					throw new UnauthorizedException('توکن نامعتبر');
 				}
 			}
 		}
