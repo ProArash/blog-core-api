@@ -1,5 +1,5 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { CreatePlanDto, IBasicBody } from './create-plan.dto';
+import { CreatePlanDto } from './create-plan.dto';
 import { IsNotEmpty } from 'class-validator';
 
 export class UpdatePlanDto extends PartialType(CreatePlanDto) {
@@ -7,14 +7,17 @@ export class UpdatePlanDto extends PartialType(CreatePlanDto) {
 	name?: string | undefined;
 
 	@IsNotEmpty()
-	context?: IBasicBody[] | undefined;
+	context?: string[] | undefined;
 
 	@IsNotEmpty()
-	features?: IBasicBody[] | undefined;
+	features?: string[] | undefined;
 
 	@IsNotEmpty()
 	price?: number | undefined;
 
 	@IsNotEmpty()
 	status?: boolean | undefined;
+
+	@IsNotEmpty()
+	caption?: string | undefined;
 }

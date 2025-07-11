@@ -17,17 +17,21 @@ export class PlanService {
 	}
 
 	async findAll() {
-		return await this.planRepo.find();
+		return await this.planRepo.find({
+			select: {
+				id: true,
+				price: true,
+				name: true,
+				context: true,
+				status: true,
+			},
+		});
 	}
 
 	async findOne(id: number) {
 		return await this.planRepo.findOne({
 			where: {
 				id,
-			},
-			relations: {
-				context: true,
-				features: true,
 			},
 		});
 	}

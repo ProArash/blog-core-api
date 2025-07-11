@@ -4,7 +4,9 @@ import { PlanEntity } from '../../plan/entities/plan.entity';
 
 @Entity()
 export class UserEntity extends FixedEntity {
-	@Column()
+	@Column({
+		nullable: true,
+	})
 	name: string;
 
 	@Column({
@@ -13,10 +15,15 @@ export class UserEntity extends FixedEntity {
 	mobile: string;
 
 	@Column({
+		select: false,
+	})
+	password: string;
+
+	@Column({
 		nullable: true,
 	})
 	otp: number;
 
-	@OneToMany(() => PlanEntity, (plan) => plan.user)
+	@OneToMany(() => PlanEntity, (plan) => plan.user, { cascade: true })
 	plans: PlanEntity[];
 }

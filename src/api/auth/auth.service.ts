@@ -1,26 +1,84 @@
-import { Injectable } from '@nestjs/common';
+import {
+	BadRequestException,
+	Injectable,
+	NotFoundException,
+} from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UserEntity } from '../user/entities/user.entity';
+import { Repository } from 'typeorm';
+import { JwtService } from '@nestjs/jwt';
+import { UserPayload } from '../utils/user.payload';
+import * as bcrypt from 'bcrypt';
+
+export interface IAuthResponse {
+	access_token: string;
+	refresh_token: string;
+}
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
-  }
+	constructor(
+		@InjectRepository(UserEntity)
+		private userRepo: Repository<UserEntity>,
+		private jwtService: JwtService,
+	) {}
 
-  findAll() {
-    return `This action returns all auth`;
-  }
+	async signIn(createDto: CreateAuthDto): Promise<IAuthResponse> {
+		let user = await this.userRepo.findOne({
+			where: {
+				mobile: createDto.mobile,
+			},
+			select: {
+				id: true,
+				mobile: true,
+				password: true,
+				name: true,
+			},
+		});
+		if (!user) {
+			user = await this.userRepo
+				.create({
+					...createDto,
+					password: await bcrypt.hash(createDto.password, 10),
+				})
+				.save();
+			const payload: UserPayload = {
+				id: user.id,
+				name: user.name,
+				mobile: user.mobile,
+			};
+			return {
+				access_token: await this.jwtService.signAsync(payload),
+				refresh_token: await this.generateRefreshToken(payload),
+			};
+		} else {
+			const result = await bcrypt.compare(createDto.password, user.password);
+			if (!result) throw new BadRequestException('رمز وارد شده اشتباه است');
+		}
+		const payload: UserPayload = {
+			id: user.id,
+			name: user.name,
+			mobile: user.mobile,
+		};
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
+		return {
+			access_token: await this.jwtService.signAsync(payload),
+			refresh_token: await this.generateRefreshToken(payload),
+		};
+	}
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
+	async getCurrentUser(userId: number): Promise<UserEntity> {
+		const user = await this.userRepo.findOne({
+			where: {
+				id: userId,
+			},
+		});
+		if (!user) throw new NotFoundException('کاربر یافت نشد');
+		return user;
+	}
 
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
-  }
+	async generateRefreshToken(payload: UserPayload): Promise<string> {
+		return await this.jwtService.signAsync(payload, { expiresIn: '90d' });
+	}
 }
