@@ -1,7 +1,6 @@
 import {
 	BaseEntity,
 	CreateDateColumn,
-	DeleteDateColumn,
 	Entity,
 	PrimaryGeneratedColumn,
 	UpdateDateColumn,
@@ -17,7 +16,4 @@ export class FixedEntity extends BaseEntity {
 
 	@UpdateDateColumn()
 	updatedAt: Date;
-
-	@DeleteDateColumn()
-	deletedAt: Date;
 }

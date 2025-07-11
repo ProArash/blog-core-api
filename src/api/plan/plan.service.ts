@@ -1,26 +1,42 @@
 import { Injectable } from '@nestjs/common';
 import { CreatePlanDto } from './dto/create-plan.dto';
 import { UpdatePlanDto } from './dto/update-plan.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { PlanEntity } from './entities/plan.entity';
 
 @Injectable()
 export class PlanService {
-	create(createPlanDto: CreatePlanDto) {
-		return 'This action adds a new plan';
+	constructor(
+		@InjectRepository(PlanEntity)
+		private planRepo: Repository<PlanEntity>,
+	) {}
+
+	async create(createPlanDto: CreatePlanDto) {
+		return await this.planRepo.create(createPlanDto).save();
 	}
 
-	findAll() {
-		return `This action returns all plan`;
+	async findAll() {
+		return await this.planRepo.find();
 	}
 
-	findOne(id: number) {
-		return `This action returns a #${id} plan`;
+	async findOne(id: number) {
+		return await this.planRepo.findOne({
+			where: {
+				id,
+			},
+			relations: {
+				context: true,
+				features: true,
+			},
+		});
 	}
 
-	update(id: number, updatePlanDto: UpdatePlanDto) {
-		return `This action updates a #${id} plan`;
+	async update(id: number, updatePlanDto: UpdatePlanDto) {
+		return await this.planRepo.update(id, updatePlanDto);
 	}
 
-	remove(id: number) {
-		return `This action removes a #${id} plan`;
+	async remove(id: number) {
+		return await this.planRepo.delete(id);
 	}
 }

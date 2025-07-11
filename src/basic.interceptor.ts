@@ -6,26 +6,27 @@ import {
 } from '@nestjs/common';
 import { map, Observable } from 'rxjs';
 
-export interface BasicResponse {
+export interface BasicResponse<T = undefined> {
 	message: string;
-	count: number;
+	count?: number;
+	data?: T;
 }
 
 @Injectable()
-export class BasicInterceptor implements NestInterceptor {
+export class BasicInterceptor<T>
+	implements NestInterceptor<T, BasicResponse<T>>
+{
 	intercept(
 		context: ExecutionContext,
 		next: CallHandler,
-	): Observable<BasicResponse> {
+	): Observable<BasicResponse<T>> {
 		return next.handle().pipe(
-			map((data: BasicResponse) => {
+			map((data: T) => {
 				let count = 0;
-				console.log('interceptor log: ', data);
-
 				if (Array.isArray(data)) {
 					count = data.length;
 				}
-				return { ...data, count, message: 'ok' };
+				return { message: 'ok', count, data };
 			}),
 		);
 	}

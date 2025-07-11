@@ -6,23 +6,25 @@ import {
 	Patch,
 	Param,
 	Delete,
+	ValidationPipe,
 } from '@nestjs/common';
 import { PlanService } from './plan.service';
 import { CreatePlanDto } from './dto/create-plan.dto';
 import { UpdatePlanDto } from './dto/update-plan.dto';
+import { PlanEntity } from './entities/plan.entity';
 
 @Controller('plan')
 export class PlanController {
 	constructor(private readonly planService: PlanService) {}
 
 	@Post()
-	create(@Body() createPlanDto: CreatePlanDto) {
-		return this.planService.create(createPlanDto);
+	async create(@Body(new ValidationPipe()) createPlanDto: CreatePlanDto) {
+		await this.planService.create(createPlanDto);
 	}
 
 	@Get()
-	findAll() {
-		return this.planService.findAll();
+	async findAll(): Promise<PlanEntity[]> {
+		return await this.planService.findAll();
 	}
 
 	@Get(':id')
@@ -31,7 +33,10 @@ export class PlanController {
 	}
 
 	@Patch(':id')
-	update(@Param('id') id: string, @Body() updatePlanDto: UpdatePlanDto) {
+	update(
+		@Param('id') id: string,
+		@Body(new ValidationPipe()) updatePlanDto: UpdatePlanDto,
+	) {
 		return this.planService.update(+id, updatePlanDto);
 	}
 

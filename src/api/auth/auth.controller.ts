@@ -1,60 +1,34 @@
-import {
-	Body,
-	Controller,
-	Get,
-	Post,
-	Req,
-	Res,
-	UseGuards,
-	ValidationPipe,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { AuthGuard } from '@nestjs/passport';
-import { AuthDto } from './dto/auth.dto';
-import { AuthResponse } from './auth.response';
-import { Request, Response } from 'express';
-import { UserPayload } from './user.payload';
+import { CreateAuthDto } from './dto/create-auth.dto';
+import { UpdateAuthDto } from './dto/update-auth.dto';
 
 @Controller('auth')
 export class AuthController {
-	constructor(private authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
 
-	@UseGuards(AuthGuard('jwt'))
-	@Get('profile')
-	getCurrentProfile(@Req() req: Request) {
-		const user: UserPayload = req.user as UserPayload;
-		console.log(user.id);
-		if (user.id) return this.authService.getUserById(user.id);
-		return { message: 'Something went wrong.' };
-	}
+  @Post()
+  create(@Body() createAuthDto: CreateAuthDto) {
+    return this.authService.create(createAuthDto);
+  }
 
-	@Post('signIn')
-	async signIn(
-		@Body(new ValidationPipe()) authDto: AuthDto,
-		@Res() res: Response,
-	) {
-		const tokens: AuthResponse = await this.authService.signIn(authDto);
+  @Get()
+  findAll() {
+    return this.authService.findAll();
+  }
 
-		res.cookie('access_token', tokens.access_token, {
-			httpOnly: true,
-			sameSite: 'lax',
-			path: '/',
-			secure: process.env.ENV == 'dev' ? false : true,
-		});
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.authService.findOne(+id);
+  }
 
-		res.cookie('refresh_token', tokens.refresh_token, {
-			httpOnly: true,
-			sameSite: 'lax',
-			path: '/',
-			secure: process.env.ENV == 'dev' ? false : true,
-		});
-		res.status(200).json({
-			message: 'success',
-		});
-	}
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
+    return this.authService.update(+id, updateAuthDto);
+  }
 
-	@Post('register')
-	async register(@Body(new ValidationPipe()) authDto: AuthDto) {
-		return await this.authService.newUser(authDto);
-	}
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.authService.remove(+id);
+  }
 }
