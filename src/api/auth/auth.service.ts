@@ -9,7 +9,7 @@ import { UserEntity } from '../user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { UserPayload } from '../utils/user.payload';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 export interface IAuthResponse {
 	access_token: string;
