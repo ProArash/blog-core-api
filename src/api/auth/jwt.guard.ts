@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { UserPayload } from '../utils/user.payload';
+import { UserPayload } from '../../utils/user.payload';
 import { JwtService, TokenExpiredError } from '@nestjs/jwt';
 import { IAuthResponse } from './auth.service';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
+export class JwtAuthGuard extends PassportStrategy(Strategy, 'jwt') {
 	constructor(
 		private jwtService: JwtService,
 		private configService: ConfigService,
@@ -32,18 +32,16 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 		try {
 			await this.jwtService.verifyAsync(cookies.access_token);
 		} catch (error) {
-			console.log(error);
 			if (error instanceof TokenExpiredError) {
 				const newPayload: UserPayload = {
 					id: payload.id,
 					name: payload.name,
 					mobile: payload.mobile,
+					roles: payload.roles,
 				};
 				payload = newPayload;
 				const accesToken = await this.jwtService.signAsync(newPayload);
-				req.res?.cookie('access_token', accesToken, {
-					httpOnly: true,
-				});
+				req.res?.cookie('access_token', accesToken);
 			}
 		}
 

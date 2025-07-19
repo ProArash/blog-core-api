@@ -4,6 +4,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PlanModule } from './api/plan/plan.module';
 import { UserModule } from './api/user/user.module';
 import { AuthModule } from './api/auth/auth.module';
+import { OrderModule } from './api/order/order.module';
+import { DiscountModule } from './api/discount/discount.module';
 
 @Module({
 	imports: [
@@ -17,12 +19,14 @@ import { AuthModule } from './api/auth/auth.module';
 				type: 'mysql',
 				url: configService.get<string>('DB_URL'),
 				autoLoadEntities: true,
-				synchronize: configService.get<string>('ENV') == 'dev' ? true : false,
+				synchronize: true,
 			}),
 		}),
 		PlanModule,
 		UserModule,
 		AuthModule,
+		OrderModule,
+		DiscountModule,
 	],
 })
 export class AppModule {}

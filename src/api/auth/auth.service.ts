@@ -5,10 +5,10 @@ import {
 } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserEntity } from '../user/entities/user.entity';
+import { UserEntity, UserRoles } from '../user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
-import { UserPayload } from '../utils/user.payload';
+import { UserPayload } from '../../utils/user.payload';
 import * as bcrypt from 'bcryptjs';
 
 export interface IAuthResponse {
@@ -25,6 +25,7 @@ export class AuthService {
 	) {}
 
 	async signIn(createDto: CreateAuthDto): Promise<IAuthResponse> {
+		const users = await this.userRepo.find();
 		let user = await this.userRepo.findOne({
 			where: {
 				mobile: createDto.mobile,
@@ -34,12 +35,17 @@ export class AuthService {
 				mobile: true,
 				password: true,
 				name: true,
+				roles: true,
 			},
 		});
 		if (!user) {
 			user = await this.userRepo
 				.create({
 					...createDto,
+					roles:
+						users.length == 0
+							? [UserRoles.ADMIN, UserRoles.USER]
+							: [UserRoles.USER],
 					password: await bcrypt.hash(createDto.password, 10),
 				})
 				.save();
@@ -47,6 +53,7 @@ export class AuthService {
 				id: user.id,
 				name: user.name,
 				mobile: user.mobile,
+				roles: user.roles,
 			};
 			return {
 				access_token: await this.jwtService.signAsync(payload),
@@ -60,6 +67,7 @@ export class AuthService {
 			id: user.id,
 			name: user.name,
 			mobile: user.mobile,
+			roles: user.roles,
 		};
 
 		return {

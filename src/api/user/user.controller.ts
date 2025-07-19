@@ -4,39 +4,67 @@ import {
 	Post,
 	Body,
 	Patch,
-	Param,
 	Delete,
+	UseGuards,
+	ValidationPipe,
+	Req,
+	Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
+import { UserRoles } from './entities/user.entity';
+import { Request } from 'express';
+import { UserPayload } from '../../utils/user.payload';
 
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller('user')
 export class UserController {
 	constructor(private readonly userService: UserService) {}
 
+	@Roles(UserRoles.ADMIN)
 	@Post()
 	create(@Body() createUserDto: CreateUserDto) {
-		return this.userService.create(createUserDto);
+		return this.userService.newUser(createUserDto);
 	}
 
+	@Roles(UserRoles.ADMIN)
 	@Get()
 	findAll() {
-		return this.userService.findAll();
+		return this.userService.getAllUsers();
 	}
 
-	@Get(':id')
-	findOne(@Param('id') id: string) {
-		return this.userService.findOne(+id);
+	@Roles(UserRoles.ADMIN)
+	@Get()
+	findOne(@Query('userId') userId: string) {
+		return this.userService.getUserById(+userId);
 	}
 
-	@Patch(':id')
-	update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-		return this.userService.update(+id, updateUserDto);
+	@Roles(UserRoles.ADMIN)
+	@Patch()
+	update(
+		@Query('userId') userId: string,
+		@Body() updateUserDto: UpdateUserDto,
+	) {
+		return this.userService.updateUserById(+userId, updateUserDto);
 	}
 
-	@Delete(':id')
-	remove(@Param('id') id: string) {
-		return this.userService.remove(+id);
+	@Roles(UserRoles.ADMIN)
+	@Delete()
+	remove(@Query('userId') userId: string) {
+		return this.userService.removeUserById(+userId);
+	}
+
+	@Roles(UserRoles.USER)
+	@Patch('editProfile')
+	async updateCurrentProfile(
+		@Body(new ValidationPipe()) userDto: UpdateUserDto,
+		@Req() req: Request,
+	) {
+		const user = req.user as UserPayload;
+		return await this.userService.updateCurrentUserById(user.id, userDto);
 	}
 }

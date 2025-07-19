@@ -1,23 +1,34 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreatePlanDto } from './create-plan.dto';
 import { IsNotEmpty } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdatePlanDto extends PartialType(CreatePlanDto) {
+	@ApiProperty()
 	@IsNotEmpty()
-	name?: string | undefined;
+	planId: string;
 
+	@ApiProperty()
 	@IsNotEmpty()
-	context?: string[] | undefined;
+	name: string;
 
+	@ApiProperty()
 	@IsNotEmpty()
-	features?: string[] | undefined;
+	context: string[];
 
+	@ApiProperty()
 	@IsNotEmpty()
-	price?: number | undefined;
+	features: string[];
 
+	@ApiProperty()
 	@IsNotEmpty()
-	status?: boolean | undefined;
+	price: number;
 
+	@ApiProperty()
 	@IsNotEmpty()
-	caption?: string | undefined;
+	status: boolean;
+
+	@ApiProperty()
+	@IsNotEmpty()
+	caption: string;
 }

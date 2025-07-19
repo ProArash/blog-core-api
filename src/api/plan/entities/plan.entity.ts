@@ -1,13 +1,14 @@
 import { Column, Entity, ManyToOne } from 'typeorm';
-import { FixedEntity } from '../../utils/fixed.model';
+import { FixedEntity } from '../../../utils/fixed.model';
 import { UserEntity } from '../../user/entities/user.entity';
+import { OrderEntity } from '../../order/entities/order.entity';
 
 @Entity()
 export class PlanEntity extends FixedEntity {
 	@Column()
 	name: string;
 
-	@Column()
+	@Column('bigint')
 	price: number;
 
 	@Column()
@@ -24,9 +25,12 @@ export class PlanEntity extends FixedEntity {
 	@Column('simple-array')
 	context: string[];
 
-	@Column()
+	@Column('text')
 	caption: string;
 
 	@ManyToOne(() => UserEntity, (user) => user.plans)
 	user: UserEntity;
+
+	@ManyToOne(() => OrderEntity, (order) => order.plan)
+	orders: OrderEntity[];
 }

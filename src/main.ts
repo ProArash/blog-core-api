@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 3000;
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule);
 	app.enableCors({
-		origin: 'http://localhost:3000',
+		origin: ['http://localhost:3000', 'https://arash.vip'],
 		credentials: true,
 	});
 	app.use(cookieParser());
@@ -49,11 +49,12 @@ async function bootstrap() {
 		.addBearerAuth()
 		.build();
 	const document = () => SwaggerModule.createDocument(app, config);
-	SwaggerModule.setup('docs', app, document);
+	SwaggerModule.setup('/', app, document);
 	await app.listen(PORT);
 }
 bootstrap()
 	.then(() => {
+		console.clear();
 		console.log(`server is running on port ${PORT}`);
 	})
 	.catch((err) => console.log(err));

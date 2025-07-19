@@ -13,7 +13,7 @@ import { CreateAuthDto } from './dto/create-auth.dto';
 import { Request, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
-import { UserPayload } from '../utils/user.payload';
+import { UserPayload } from '../../utils/user.payload';
 
 @Controller('auth')
 export class AuthController {
@@ -48,6 +48,23 @@ export class AuthController {
 	@Get('profile')
 	async getProfile(@Req() req: Request) {
 		const { id } = req.user as UserPayload;
-		return await this.authService.getCurrentUser(id!);
+		return await this.authService.getCurrentUser(id);
+	}
+
+	@UseGuards(AuthGuard('jwt'))
+	@Post('logOut')
+	logOut(@Res() res: Response) {
+		const isLocal = this.configService.get<string>('ENV') == 'dev';
+		res.clearCookie('refresh_token', {
+			path: '/',
+			domain: isLocal ? 'localhost' : 'arash.vip',
+		});
+		res.clearCookie('access_token', {
+			path: '/',
+			domain: isLocal ? 'localhost' : 'arash.vip',
+		});
+		res.status(200).json({
+			message: 'از اکانت خود خارج شدید',
+		});
 	}
 }

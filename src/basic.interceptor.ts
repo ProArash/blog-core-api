@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { map, Observable } from 'rxjs';
 
-export interface BasicResponse<T = undefined> {
+export interface IBasicResponse<T = undefined> {
 	message: string;
 	count?: number;
 	data?: T;
@@ -14,19 +14,24 @@ export interface BasicResponse<T = undefined> {
 
 @Injectable()
 export class BasicInterceptor<T>
-	implements NestInterceptor<T, BasicResponse<T>>
+	implements NestInterceptor<T, IBasicResponse<T>>
 {
 	intercept(
 		context: ExecutionContext,
 		next: CallHandler,
-	): Observable<BasicResponse<T>> {
+	): Observable<IBasicResponse<T>> {
 		return next.handle().pipe(
 			map((data: T) => {
-				let count = 0;
+				let count: number | undefined = undefined;
 				if (Array.isArray(data)) {
 					count = data.length;
 				}
-				return { message: 'ok', count, data };
+				const noData = typeof data == 'boolean';
+				return {
+					message: 'عملیات موفق',
+					count,
+					data: noData ? undefined : data,
+				};
 			}),
 		);
 	}

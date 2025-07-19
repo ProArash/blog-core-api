@@ -1,26 +1,46 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UserEntity } from './entities/user.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class UserService {
-	create(createUserDto: CreateUserDto) {
-		return 'This action adds a new user';
+	constructor(
+		@InjectRepository(UserEntity)
+		private userRepo: Repository<UserEntity>,
+	) {}
+	async newUser(createUserDto: CreateUserDto) {
+		return await this.userRepo.create(createUserDto).save();
 	}
 
-	findAll() {
-		return `This action returns all user`;
+	async getAllUsers() {
+		return await this.userRepo.find();
 	}
 
-	findOne(id: number) {
-		return `This action returns a #${id} user`;
+	async getUserById(userId: number) {
+		const user = await this.userRepo.findOne({
+			where: {
+				id: userId,
+			},
+		});
+		if (!user) throw new NotFoundException('کاربر یافت نشد');
+		return user;
 	}
 
-	update(id: number, updateUserDto: UpdateUserDto) {
-		return `This action updates a #${id} user`;
+	async updateUserById(userId: number, updateUserDto: UpdateUserDto) {
+		return await this.userRepo.update(userId, { ...updateUserDto });
 	}
 
-	remove(id: number) {
-		return `This action removes a #${id} user`;
+	async updateCurrentUserById(userId: number, updateUserDto: UpdateUserDto) {
+		delete updateUserDto.password;
+		return await this.userRepo.update(userId, {
+			...updateUserDto,
+		});
+	}
+
+	async removeUserById(userId: number) {
+		return await this.userRepo.delete(userId);
 	}
 }

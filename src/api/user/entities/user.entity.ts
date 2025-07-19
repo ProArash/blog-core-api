@@ -1,6 +1,13 @@
 import { Column, Entity, OneToMany } from 'typeorm';
-import { FixedEntity } from '../../utils/fixed.model';
+import { FixedEntity } from '../../../utils/fixed.model';
 import { PlanEntity } from '../../plan/entities/plan.entity';
+import { OrderEntity } from '../../order/entities/order.entity';
+
+export enum UserRoles {
+	USER = 'User',
+	ADMIN = 'Admin',
+	ROOT = 'Root',
+}
 
 @Entity()
 export class UserEntity extends FixedEntity {
@@ -24,6 +31,14 @@ export class UserEntity extends FixedEntity {
 	})
 	otp: number;
 
+	@Column('simple-array', {
+		nullable: true,
+	})
+	roles: UserRoles[];
+
 	@OneToMany(() => PlanEntity, (plan) => plan.user, { cascade: true })
 	plans: PlanEntity[];
+
+	@OneToMany(() => OrderEntity, (order) => order.user)
+	orders: OrderEntity[];
 }
