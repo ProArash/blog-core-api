@@ -33,7 +33,7 @@ async function bootstrap() {
 					{
 						message: 'خطا در ورود اطلاعات',
 						status: HttpStatus.BAD_REQUEST,
-						properies: errorObject,
+						properties: errorObject,
 						errors: errorStrings,
 					},
 					HttpStatus.BAD_REQUEST,
