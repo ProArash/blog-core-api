@@ -34,7 +34,9 @@ export class AuthController {
 		res.cookie('access_token', auth.access_token);
 		res.cookie('refresh_token', auth.refresh_token, {
 			path: '/',
-			domain: isLocal ? 'localhost' : 'arash.vip',
+			domain: isLocal
+				? 'localhost'
+				: (this.configService.get<string>('DOMAIN') ?? ''),
 			httpOnly: true,
 			secure: isLocal ? false : true,
 			maxAge: 1000 * 60 * 60 * 24 * 90,
@@ -57,11 +59,15 @@ export class AuthController {
 		const isLocal = this.configService.get<string>('ENV') == 'dev';
 		res.clearCookie('refresh_token', {
 			path: '/',
-			domain: isLocal ? 'localhost' : 'arash.vip',
+			domain: isLocal
+				? 'localhost'
+				: (this.configService.get<string>('DOMAIN') ?? ''),
 		});
 		res.clearCookie('access_token', {
 			path: '/',
-			domain: isLocal ? 'localhost' : 'arash.vip',
+			domain: isLocal
+				? 'localhost'
+				: (this.configService.get<string>('DOMAIN') ?? ''),
 		});
 		res.status(200).json({
 			message: 'از اکانت خود خارج شدید',
