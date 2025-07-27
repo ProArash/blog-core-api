@@ -15,7 +15,7 @@ export class PlanEntity extends FixedEntity {
 	status: boolean;
 
 	@Column({
-		default: true,
+		default: false,
 	})
 	payment_status: boolean;
 

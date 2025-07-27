@@ -2,6 +2,7 @@ import { Column, Entity, ManyToOne } from 'typeorm';
 import { FixedEntity } from '../../../utils/fixed.model';
 import { UserEntity } from '../../user/entities/user.entity';
 import { PlanEntity } from '../../plan/entities/plan.entity';
+import { CourseEntity } from '../../course/entities/course.entity';
 
 @Entity()
 export class OrderEntity extends FixedEntity {
@@ -28,4 +29,7 @@ export class OrderEntity extends FixedEntity {
 
 	@ManyToOne(() => PlanEntity, (plan) => plan.orders)
 	plan: PlanEntity;
+
+	@ManyToOne(() => CourseEntity, (course) => course.orders)
+	course: CourseEntity;
 }

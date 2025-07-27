@@ -6,11 +6,18 @@ import { UserModule } from './api/user/user.module';
 import { AuthModule } from './api/auth/auth.module';
 import { OrderModule } from './api/order/order.module';
 import { DiscountModule } from './api/discount/discount.module';
+import { CourseModule } from './api/course/course.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
 	imports: [
 		ConfigModule.forRoot({
 			isGlobal: true,
+		}),
+		ServeStaticModule.forRoot({
+			rootPath: join(__dirname, '..', 'uploads'),
+			serveRoot: '/uploads',
 		}),
 		TypeOrmModule.forRootAsync({
 			imports: [ConfigModule],
@@ -27,6 +34,7 @@ import { DiscountModule } from './api/discount/discount.module';
 		AuthModule,
 		OrderModule,
 		DiscountModule,
+		CourseModule,
 	],
 })
 export class AppModule {}

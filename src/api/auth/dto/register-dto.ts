@@ -1,7 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
 
-export class CreateAuthDto {
+export class RegisterDto {
+	@ApiProperty()
+	@IsNotEmpty({ message: 'نام اجباری است' })
+	name: string;
+
 	@ApiProperty()
 	@IsNotEmpty({ message: 'موبایل اجباری است' })
 	mobile: string;

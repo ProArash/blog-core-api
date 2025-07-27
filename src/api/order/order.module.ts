@@ -6,6 +6,7 @@ import { OrderEntity } from './entities/order.entity';
 import { UserModule } from '../user/user.module';
 import { PlanModule } from '../plan/plan.module';
 import { DiscountModule } from '../discount/discount.module';
+import { CourseModule } from '../course/course.module';
 
 @Module({
 	imports: [
@@ -13,6 +14,7 @@ import { DiscountModule } from '../discount/discount.module';
 		PlanModule,
 		UserModule,
 		DiscountModule,
+		CourseModule,
 	],
 	controllers: [OrderController],
 	providers: [OrderService],

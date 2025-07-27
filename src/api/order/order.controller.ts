@@ -8,9 +8,9 @@ import {
 	Query,
 	Res,
 	Delete,
+	BadRequestException,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
-import { CreateOrderDto } from './dto/create-order.dto';
 import { Request, Response } from 'express';
 import { UserPayload } from '../../utils/user.payload';
 import { AuthGuard } from '@nestjs/passport';
@@ -20,10 +20,22 @@ export class OrderController {
 	constructor(private readonly orderService: OrderService) {}
 
 	@UseGuards(AuthGuard('jwt'))
-	@Post()
-	async create(@Body() createOrderDto: CreateOrderDto, @Req() req: Request) {
-		const userId = req.user as UserPayload;
-		return await this.orderService.createNewPayment(createOrderDto, userId.id);
+	@Post('newPlanPayment')
+	async newPlanPayment(@Query('planId') planId: string, @Req() req: Request) {
+		const { id: userId } = req.user as UserPayload;
+		return await this.orderService.newPlanPayment(+planId, userId);
+	}
+
+	@UseGuards(AuthGuard('jwt'))
+	@Post('newCoursePayment')
+	async newCoursePayment(
+		@Query('courseId') courseId: string,
+		@Req() req: Request,
+	) {
+		const { id: userId } = req.user as UserPayload;
+		if (!courseId || courseId == '')
+			throw new BadRequestException('ایدی دوره اجباری است');
+		return await this.orderService.newCoursePayment(+courseId, userId);
 	}
 
 	@Get('verify')
@@ -33,8 +45,7 @@ export class OrderController {
 		@Query('orderId') orderId: string,
 		@Res() res: Response,
 	) {
-		const status = success == 1 ? true : false;
-		await this.orderService.verifyPayment(trackId, status, orderId);
+		await this.orderService.verifyPayment(trackId, orderId);
 		const redirectUrl =
 			process.env.ENV == 'dev'
 				? `http://localhost:3000/order/?id=${orderId}`
@@ -51,10 +62,27 @@ export class OrderController {
 	}
 
 	@UseGuards(AuthGuard('jwt'))
-	@Get('myOrders')
-	async getUserOrders(@Req() req: Request) {
+	@Get('myPlans')
+	async getUserPlans(
+		@Req() req: Request,
+		@Query('pageNumber') pageNumber: string,
+	) {
 		const user = req.user as UserPayload;
-		return await this.orderService.getUserOrders(user.id);
+		if (!pageNumber || pageNumber == '')
+			throw new BadRequestException('شماره صفحه اجباری است.');
+		return await this.orderService.getUserPlans(user.id, +pageNumber);
+	}
+
+	@UseGuards(AuthGuard('jwt'))
+	@Get('myCourses')
+	async getUserCourses(
+		@Req() req: Request,
+		@Query('pageNumber') pageNumber: string,
+	) {
+		const user = req.user as UserPayload;
+		if (!pageNumber || pageNumber == '')
+			throw new BadRequestException('شماره صفحه اجباری است.');
+		return await this.orderService.getUserCourses(user.id, +pageNumber);
 	}
 
 	@UseGuards(AuthGuard('jwt'))

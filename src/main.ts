@@ -50,7 +50,6 @@ async function bootstrap() {
 		.setDescription('Kamangir api')
 		.setVersion('0.1')
 		.addTag('arash.vip')
-		.addBearerAuth()
 		.build();
 	const document = () => SwaggerModule.createDocument(app, config);
 	SwaggerModule.setup('/', app, document);

@@ -9,11 +9,12 @@ import {
 	ValidationPipe,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
+import { SignInDto } from './dto/signin-dto';
 import { Request, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import { UserPayload } from '../../utils/user.payload';
+import { RegisterDto } from './dto/register-dto';
 
 @Controller('auth')
 export class AuthController {
@@ -24,10 +25,34 @@ export class AuthController {
 
 	@Post('signIn')
 	async signIn(
-		@Body(new ValidationPipe()) createAuthDto: CreateAuthDto,
+		@Body(new ValidationPipe()) signInDto: SignInDto,
 		@Res() res: Response,
 	) {
-		const auth = await this.authService.signIn(createAuthDto);
+		const auth = await this.authService.signIn(signInDto);
+
+		const isLocal = this.configService.get<string>('ENV') == 'dev';
+
+		res.cookie('access_token', auth.access_token);
+		res.cookie('refresh_token', auth.refresh_token, {
+			path: '/',
+			domain: isLocal
+				? 'localhost'
+				: (this.configService.get<string>('DOMAIN') ?? ''),
+			httpOnly: true,
+			secure: isLocal ? false : true,
+			maxAge: 1000 * 60 * 60 * 24 * 90,
+		});
+		res.status(200).json({
+			message: 'با موفقیت وارد شدید.',
+		});
+	}
+
+	@Post('register')
+	async register(
+		@Body(new ValidationPipe()) registerDto: RegisterDto,
+		@Res() res: Response,
+	) {
+		const auth = await this.authService.register(registerDto);
 
 		const isLocal = this.configService.get<string>('ENV') == 'dev';
 

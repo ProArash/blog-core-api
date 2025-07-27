@@ -1,5 +1,6 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, ManyToOne } from 'typeorm';
 import { FixedEntity } from '../../../utils/fixed.model';
+import { UserEntity } from '../../user/entities/user.entity';
 
 @Entity()
 export class DiscountEntity extends FixedEntity {
@@ -9,6 +10,6 @@ export class DiscountEntity extends FixedEntity {
 	@Column()
 	discountPercent: number;
 
-	@Column()
-	maxUse: number;
+	@ManyToOne(() => UserEntity, (user) => user.discounts)
+	user: UserEntity;
 }

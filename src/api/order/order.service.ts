@@ -1,5 +1,4 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateOrderDto } from './dto/create-order.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrderEntity } from './entities/order.entity';
 import { Repository } from 'typeorm';
@@ -8,13 +7,13 @@ import axios from 'axios';
 import { UserService } from '../user/user.service';
 import { ConfigService } from '@nestjs/config';
 import { DiscountService } from '../discount/discount.service';
-import { DiscountEntity } from '../discount/entities/discount.entity';
 import {
 	ZibalCreatePayRequest,
 	ZibalTrackIdResponse,
 	ZibalVerifyRequest,
 	IZibalVerifyResponse,
 } from './zibal.dto';
+import { CourseService } from '../course/course.service';
 
 @Injectable()
 export class OrderService {
@@ -22,22 +21,16 @@ export class OrderService {
 		@InjectRepository(OrderEntity)
 		private orderRepo: Repository<OrderEntity>,
 		private planService: PlanService,
+		private courseService: CourseService,
 		private userService: UserService,
 		private configService: ConfigService,
 		private discountService: DiscountService,
 	) {}
-	async createNewPayment(createOrderDto: CreateOrderDto, userId: number) {
-		let discount: DiscountEntity | null = null;
-		let discountCode: string | undefined = undefined;
-		const discountId = createOrderDto.discountId;
-		const plan = await this.planService.getPlanById(createOrderDto.planId);
+	async newPlanPayment(planId: number, userId: number) {
+		const plan = await this.planService.getPlanById(planId);
 		const user = await this.userService.getUserById(userId);
-		if (discountId) {
-			discount = await this.discountService.getDiscountById(discountId);
-			discountCode = discount.discountCode;
-		}
-		let price = plan.price * 10;
-		price = discount ? price - (price * discount.discountPercent) / 100 : price;
+
+		const price = plan.price * 10;
 		const merchantCode =
 			this.configService.get<string>('ENV') == 'dev'
 				? 'zibal'
@@ -46,7 +39,6 @@ export class OrderService {
 			.create({
 				user: user,
 				amount: price,
-				usedDiscountCode: discountCode,
 				plan: {
 					id: plan.id,
 				},
@@ -54,7 +46,6 @@ export class OrderService {
 			.save();
 
 		const body: ZibalCreatePayRequest = {
-			...createOrderDto,
 			merchant: merchantCode,
 			orderId: String(order.id),
 			amount: price,
@@ -75,11 +66,45 @@ export class OrderService {
 		};
 	}
 
-	async verifyPayment(trackId: number, status: boolean, orderId: string) {
-		const order = await this.getOrderById(Number(orderId));
-		const discount = await this.discountService.getDiscountByCode(
-			order.usedDiscountCode,
+	async newCoursePayment(courseId: number, userId: number) {
+		const user = await this.userService.getUserById(userId);
+		const course = await this.courseService.getById(courseId);
+		const price = course.price * 10;
+		const merchantCode =
+			this.configService.get<string>('ENV') == 'dev'
+				? 'zibal'
+				: this.configService.get<string>('MERCHANT_CODE') || 'zibal';
+		const order = await this.orderRepo
+			.create({
+				user: user,
+				amount: price,
+				course,
+			})
+			.save();
+
+		const body: ZibalCreatePayRequest = {
+			merchant: merchantCode,
+			orderId: String(order.id),
+			amount: price,
+			callbackUrl:
+				process.env.ENV == 'dev'
+					? 'http://localhost:4000/order/verify'
+					: 'https://api.arash.vip/order/verify',
+		};
+		const urlReq = await axios.post(
+			`https://gateway.zibal.ir/v1/request`,
+			body,
 		);
+		const zibalRes = urlReq.data as ZibalTrackIdResponse;
+		order.trackId = zibalRes.trackId;
+		await order.save();
+		return {
+			payUrl: `https://gateway.zibal.ir/start/${zibalRes.trackId}`,
+		};
+	}
+
+	async verifyPayment(trackId: number, orderId: string) {
+		const order = await this.getOrderById(Number(orderId));
 		const merchantCode =
 			this.configService.get<string>('ENV') == 'dev'
 				? 'zibal'
@@ -98,10 +123,8 @@ export class OrderService {
 			const isSuccess = verifyResponse.status == 1 ? true : false;
 			order.trackId = String(trackId);
 			order.status = isSuccess;
-			discount.maxUse = isSuccess ? discount.maxUse - 1 : discount.maxUse;
 			order.amount = verifyResponse.amount;
 			await order.save();
-			await discount.save();
 		}
 		return true;
 	}
@@ -126,8 +149,12 @@ export class OrderService {
 		return true;
 	}
 
-	async getUserOrders(userId: number) {
+	async getUserPlans(userId: number, pageNumber: number) {
+		const limit = 10;
+		const skip = (pageNumber - 1) * limit;
 		const userOrders = await this.orderRepo.find({
+			take: limit,
+			skip,
 			where: {
 				user: {
 					id: userId,
@@ -145,6 +172,30 @@ export class OrderService {
 					name: true,
 					price: true,
 				},
+			},
+		});
+		return userOrders.map((v) => ({ ...v, amount: v.amount / 10 })).reverse();
+	}
+
+	async getUserCourses(userId: number, pageNumber: number) {
+		const limit = 10;
+		const skip = (pageNumber - 1) * limit;
+		const userOrders = await this.orderRepo.find({
+			take: limit,
+			skip,
+			where: {
+				user: {
+					id: userId,
+				},
+			},
+			relations: {
+				course: true,
+			},
+			select: {
+				id: true,
+				status: true,
+				amount: true,
+				trackId: true,
 			},
 		});
 		return userOrders.map((v) => ({ ...v, amount: v.amount / 10 })).reverse();

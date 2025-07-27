@@ -2,6 +2,8 @@ import { Column, Entity, OneToMany } from 'typeorm';
 import { FixedEntity } from '../../../utils/fixed.model';
 import { PlanEntity } from '../../plan/entities/plan.entity';
 import { OrderEntity } from '../../order/entities/order.entity';
+import { CourseEntity } from '../../course/entities/course.entity';
+import { DiscountEntity } from '../../discount/entities/discount.entity';
 
 export enum UserRoles {
 	USER = 'User',
@@ -41,4 +43,10 @@ export class UserEntity extends FixedEntity {
 
 	@OneToMany(() => OrderEntity, (order) => order.user)
 	orders: OrderEntity[];
+
+	@OneToMany(() => CourseEntity, (course) => course.user)
+	courses: CourseEntity[];
+
+	@OneToMany(() => DiscountEntity, (discount) => discount.user)
+	discounts: DiscountEntity[];
 }

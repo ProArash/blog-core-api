@@ -29,6 +29,23 @@ export class UserService {
 		return user;
 	}
 
+	async getUserByMobile(mobile: string) {
+		const user = await this.userRepo.findOne({
+			where: {
+				mobile,
+			},
+			select: {
+				id: true,
+				name: true,
+				password: true,
+				roles: true,
+				mobile: true,
+			},
+		});
+		if (!user) throw new NotFoundException('کاربر یافت نشد');
+		return user;
+	}
+
 	async updateUserById(userId: number, updateUserDto: UpdateUserDto) {
 		return await this.userRepo.update(userId, { ...updateUserDto });
 	}
