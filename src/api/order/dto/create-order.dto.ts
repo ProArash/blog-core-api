@@ -1,9 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty } from 'class-validator';
 
 export class CreateOrderDto {
 	@ApiProperty()
-	planId: number | undefined;
+	@IsNotEmpty()
+	planId: number;
 
 	@ApiProperty()
-	courseId: number | undefined;
+	@IsNotEmpty()
+	description: string;
 }

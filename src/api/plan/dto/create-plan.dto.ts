@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty } from 'class-validator';
+import { IsArray, IsNotEmpty } from 'class-validator';
 
 export class CreatePlanDto {
 	@ApiProperty()
@@ -15,6 +15,7 @@ export class CreatePlanDto {
 	price: number;
 
 	@ApiProperty()
+	@IsArray({ each: true })
 	@IsNotEmpty({ message: 'محتوای context اجباری است' })
 	context: string[];
 
@@ -23,6 +24,11 @@ export class CreatePlanDto {
 	status: boolean;
 
 	@ApiProperty()
+	@IsArray({ each: true })
 	@IsNotEmpty({ message: 'ویژگی ها اجباری است' })
 	features: string[];
+}
+
+export interface FeatureDto {
+	title: string;
 }

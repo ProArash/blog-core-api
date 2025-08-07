@@ -24,6 +24,11 @@ export class OrderEntity extends FixedEntity {
 	})
 	usedDiscountCode: string;
 
+	@Column({
+		nullable: true,
+	})
+	fileUrl: string;
+
 	@ManyToOne(() => UserEntity, (user) => user.orders)
 	user: UserEntity;
 
