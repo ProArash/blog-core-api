@@ -24,12 +24,12 @@ import { CheckDiscountCodeDto } from './dto/check-discount.dto';
 export class DiscountController {
 	constructor(private readonly discountService: DiscountService) {}
 
-	@Post()
+	@Post('newDiscount')
 	async newDiscount(@Body() createDiscountDto: CreateDiscountDto) {
 		return await this.discountService.newDiscount(createDiscountDto);
 	}
 
-	@Get()
+	@Get('getAllDiscounts')
 	async getAllDiscounts() {
 		return await this.discountService.getAllDiscounts();
 	}

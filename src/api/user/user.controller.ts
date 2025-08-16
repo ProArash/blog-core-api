@@ -26,25 +26,25 @@ export class UserController {
 	constructor(private readonly userService: UserService) {}
 
 	@Roles(UserRoles.ADMIN)
-	@Post()
+	@Post('newUser')
 	create(@Body() createUserDto: CreateUserDto) {
 		return this.userService.newUser(createUserDto);
 	}
 
 	@Roles(UserRoles.ADMIN)
-	@Get()
-	findAll() {
-		return this.userService.getAllUsers();
+	@Get('getAllUsers')
+	findAll(@Query('pageNumber') pageNumber: string) {
+		return this.userService.getAllUsers(+pageNumber);
 	}
 
 	@Roles(UserRoles.ADMIN)
-	@Get()
+	@Get('getUserById')
 	findOne(@Query('userId') userId: string) {
 		return this.userService.getUserById(+userId);
 	}
 
 	@Roles(UserRoles.ADMIN)
-	@Patch()
+	@Patch('updateUserById')
 	update(
 		@Query('userId') userId: string,
 		@Body() updateUserDto: UpdateUserDto,
@@ -53,7 +53,7 @@ export class UserController {
 	}
 
 	@Roles(UserRoles.ADMIN)
-	@Delete()
+	@Delete('deleteUserById')
 	remove(@Query('userId') userId: string) {
 		return this.userService.removeUserById(+userId);
 	}

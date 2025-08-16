@@ -15,8 +15,13 @@ export class UserService {
 		return await this.userRepo.create(createUserDto).save();
 	}
 
-	async getAllUsers() {
-		return await this.userRepo.find();
+	async getAllUsers(pageNumber: number) {
+		const limit = 20;
+		const skip = (pageNumber - 1) * limit;
+		return await this.userRepo.find({
+			take: limit,
+			skip,
+		});
 	}
 
 	async getUserById(userId: number) {

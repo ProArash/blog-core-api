@@ -35,8 +35,7 @@ export class AuthService {
 				mobile: registerDto.mobile,
 			},
 		});
-		if (user)
-			throw new ConflictException('کاربر با این شماره موبایل ثبت نام شده');
+		if (user) throw new ConflictException('کاربر تکراری');
 		user = await this.userRepo
 			.create({
 				...registerDto,
@@ -62,7 +61,7 @@ export class AuthService {
 	async signIn(createDto: SignInDto): Promise<IAuthResponse> {
 		const user = await this.userService.getUserByMobile(createDto.mobile);
 		const result = await bcrypt.compare(createDto.password, user.password);
-		if (!result) throw new BadRequestException('رمز وارد شده اشتباه است');
+		if (!result) throw new BadRequestException('رمز نامعتبر.');
 
 		const payload: UserPayload = {
 			id: user.id,
@@ -83,7 +82,7 @@ export class AuthService {
 				id: userId,
 			},
 		});
-		if (!user) throw new NotFoundException('کاربر یافت نشد');
+		if (!user) throw new NotFoundException('کاربر یافت نشد.');
 		return user;
 	}
 

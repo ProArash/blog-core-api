@@ -28,7 +28,7 @@ export class BasicInterceptor<T>
 				}
 				const noData = typeof data == 'boolean';
 				return {
-					message: 'عملیات موفق',
+					message: 'OK',
 					count,
 					data: noData ? undefined : data,
 				};

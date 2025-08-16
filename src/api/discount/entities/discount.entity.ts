@@ -1,5 +1,5 @@
 import { Column, Entity, ManyToOne } from 'typeorm';
-import { FixedEntity } from '../../../utils/fixed.model';
+import { FixedEntity } from '../../../utils/entities/fixed.entity';
 import { UserEntity } from '../../user/entities/user.entity';
 
 @Entity()

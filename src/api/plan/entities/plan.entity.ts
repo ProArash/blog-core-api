@@ -1,36 +1,40 @@
-import { Column, Entity, ManyToOne } from 'typeorm';
-import { FixedEntity } from '../../../utils/fixed.model';
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { FixedEntity } from '../../../utils/entities/fixed.entity';
 import { UserEntity } from '../../user/entities/user.entity';
-import { OrderEntity } from '../../order/entities/order.entity';
+import { ContextEntity } from './context.entity';
+import { FeatureEntity } from './feature.entity';
+import { MediaEntity } from '../../media/entities/media.entity';
 
 @Entity()
 export class PlanEntity extends FixedEntity {
 	@Column()
 	name: string;
 
-	@Column('bigint')
+	@Column('double')
 	price: number;
 
 	@Column()
 	status: boolean;
 
-	@Column({
-		default: false,
-	})
+	@Column({ default: false })
 	payment_status: boolean;
-
-	@Column('simple-array')
-	features: string[];
-
-	@Column('simple-array')
-	context: string[];
 
 	@Column('text')
 	caption: string;
 
-	@ManyToOne(() => UserEntity, (user) => user.plans)
-	user: UserEntity;
+	@OneToMany(() => FeatureEntity, (feature) => feature.plan, { cascade: true })
+	features: FeatureEntity[];
 
-	@ManyToOne(() => OrderEntity, (order) => order.plan)
-	orders: OrderEntity[];
+	@OneToMany(() => ContextEntity, (context) => context.plan, { cascade: true })
+	contexts: ContextEntity[];
+
+	@OneToMany(() => MediaEntity, (media) => media.plan, {
+		cascade: true,
+	})
+	medias: MediaEntity[];
+
+	@ManyToOne(() => UserEntity, (user) => user.plans, {
+		onDelete: 'CASCADE',
+	})
+	user: UserEntity;
 }

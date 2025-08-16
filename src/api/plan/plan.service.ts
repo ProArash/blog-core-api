@@ -4,21 +4,19 @@ import { UpdatePlanDto } from './dto/update-plan.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PlanEntity } from './entities/plan.entity';
+import { MediaService } from '../media/media.service';
 
 @Injectable()
 export class PlanService {
 	constructor(
 		@InjectRepository(PlanEntity)
 		private planRepo: Repository<PlanEntity>,
+		private mediaService: MediaService,
 	) {}
 
-	async create(createPlanDto: CreatePlanDto) {
-		return await this.planRepo
-			.create({
-				...createPlanDto,
-				price: createPlanDto.price,
-			})
-			.save();
+	async newPlan(createPlanDto: CreatePlanDto) {
+		const planId = await this.planRepo.create(createPlanDto).save();
+		return { planId: planId.id };
 	}
 
 	async findAll() {
@@ -27,8 +25,14 @@ export class PlanService {
 				id: true,
 				price: true,
 				name: true,
-				context: true,
+				contexts: {
+					title: true,
+				},
 				status: true,
+			},
+			relations: {
+				contexts: true,
+				features: true,
 			},
 		});
 		return plans;
@@ -39,31 +43,47 @@ export class PlanService {
 			where: {
 				id,
 			},
+			relations: {
+				contexts: true,
+				features: true,
+				medias: true,
+			},
 		});
 		if (!plan) throw new NotFoundException('پلن یافت نشد');
 		return plan;
 	}
 
-	async update(updatePlanDto: UpdatePlanDto) {
+	async updatePlanById(updatePlanDto: UpdatePlanDto) {
 		const plan = await this.planRepo.findOne({
 			where: {
-				id: +updatePlanDto.planId,
+				id: updatePlanDto.planId,
 			},
 		});
 		if (!plan) throw new NotFoundException('پلن یافت نشد');
-		plan.caption = updatePlanDto.caption;
-		plan.context = updatePlanDto.context;
-		plan.features = updatePlanDto.features;
-		plan.name = updatePlanDto.name;
-		plan.price = updatePlanDto.price;
-		plan.status = updatePlanDto.status;
+		Object.assign(plan, updatePlanDto);
 		await plan.save();
-		return {
-			message: 'عملیات موفق',
-		};
+		return true;
 	}
 
-	async remove(id: number) {
-		return await this.planRepo.delete(id);
+	async uploadPlanImages(images: string[], planId: number) {
+		const plan = await this.getPlanById(planId);
+		return await this.mediaService.newPlanMedias(images, plan);
+	}
+
+	async deletePlanById(id: number) {
+		const plan = await this.planRepo.findOne({
+			where: {
+				id,
+			},
+			relations: {
+				medias: true,
+			},
+		});
+		if (!plan) throw new NotFoundException('پلن یافت نشد');
+		await this.planRepo.delete(plan.id);
+		return true;
+	}
+	async deleteMediaById(mediaId: number) {
+		return await this.mediaService.deleteMediaById(mediaId);
 	}
 }

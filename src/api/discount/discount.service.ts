@@ -25,7 +25,7 @@ export class DiscountService {
 				discountCode: createDiscountDto.discountCode,
 			},
 		});
-		if (discount) throw new ConflictException('کد تخفیف تکراری است');
+		if (discount) throw new ConflictException('کد تخفیف تکراری است.');
 		return await this.discountRepo.create({ ...createDiscountDto }).save();
 	}
 
@@ -59,7 +59,7 @@ export class DiscountService {
 				discountCode: discountDto.discountCode,
 			},
 		});
-		if (!discount) throw new NotFoundException('کد تخفیف یافت نشد');
+		if (!discount) throw new NotFoundException();
 		const plan = await this.planService.getPlanById(discountDto.planId);
 		const price = plan.price - (discount.discountPercent * plan.price) / 100;
 		return {

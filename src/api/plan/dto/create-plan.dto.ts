@@ -1,34 +1,36 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsNotEmpty } from 'class-validator';
+import { IsNotEmpty } from 'class-validator';
 
 export class CreatePlanDto {
 	@ApiProperty()
-	@IsNotEmpty({ message: 'نام پلن اجباری است' })
+	@IsNotEmpty()
 	name: string;
 
 	@ApiProperty()
-	@IsNotEmpty({ message: 'توضیحات پلن اجباری است' })
+	@IsNotEmpty()
 	caption: string;
 
-	@ApiProperty()
-	@IsNotEmpty({ message: 'قیمت اجباری است' })
+	@ApiProperty({ example: 10000 })
+	@IsNotEmpty()
 	price: number;
 
-	@ApiProperty()
-	@IsArray({ each: true })
-	@IsNotEmpty({ message: 'محتوای context اجباری است' })
-	context: string[];
+	@ApiProperty({ example: [{ title: 'context 1' }] })
+	@IsNotEmpty()
+	contexts: ContextDto[];
 
-	@ApiProperty()
-	@IsNotEmpty({ message: 'وضعیت پلن اجباری است' })
+	@ApiProperty({ example: true })
+	@IsNotEmpty()
 	status: boolean;
 
-	@ApiProperty()
-	@IsArray({ each: true })
-	@IsNotEmpty({ message: 'ویژگی ها اجباری است' })
-	features: string[];
+	@ApiProperty({ example: [{ title: 'Feature 1' }] })
+	@IsNotEmpty()
+	features: FeatureDto[];
 }
 
 export interface FeatureDto {
+	title: string;
+}
+
+export interface ContextDto {
 	title: string;
 }

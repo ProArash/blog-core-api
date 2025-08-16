@@ -43,7 +43,7 @@ export class AuthController {
 			maxAge: 1000 * 60 * 60 * 24 * 90,
 		});
 		res.status(200).json({
-			message: 'با موفقیت وارد شدید.',
+			message: 'با موفقیت وارد شدید',
 		});
 	}
 
@@ -67,7 +67,7 @@ export class AuthController {
 			maxAge: 1000 * 60 * 60 * 24 * 90,
 		});
 		res.status(200).json({
-			message: 'با موفقیت وارد شدید.',
+			message: 'با موفقیت وارد شدید',
 		});
 	}
 
@@ -95,7 +95,7 @@ export class AuthController {
 				: (this.configService.get<string>('DOMAIN') ?? ''),
 		});
 		res.status(200).json({
-			message: 'از اکانت خود خارج شدید',
+			message: 'از حساب خود خارج شدید',
 		});
 	}
 }

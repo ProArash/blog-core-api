@@ -3,10 +3,10 @@ import { IsNotEmpty } from 'class-validator';
 
 export class SignInDto {
 	@ApiProperty({ example: '09392414124' })
-	@IsNotEmpty({ message: 'موبایل اجباری است' })
+	@IsNotEmpty()
 	mobile: string;
 
-	@ApiProperty({ example: 'password' })
-	@IsNotEmpty({ message: 'رمز عبور اجباری است' })
+	@ApiProperty({ example: 'somePassword123' })
+	@IsNotEmpty()
 	password: string;
 }

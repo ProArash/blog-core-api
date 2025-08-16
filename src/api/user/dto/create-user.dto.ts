@@ -15,7 +15,7 @@ export class CreateUserDto {
 	@IsNotEmpty()
 	password: string;
 
-	@ApiProperty()
+	@ApiProperty({ example: [UserRoles.ADMIN, UserRoles.USER] })
 	@IsNotEmpty()
 	roles: UserRoles[];
 }

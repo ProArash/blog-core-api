@@ -3,14 +3,14 @@ import { IsNotEmpty } from 'class-validator';
 
 export class RegisterDto {
 	@ApiProperty()
-	@IsNotEmpty({ message: 'نام اجباری است' })
+	@IsNotEmpty()
 	name: string;
 
 	@ApiProperty()
-	@IsNotEmpty({ message: 'موبایل اجباری است' })
+	@IsNotEmpty()
 	mobile: string;
 
 	@ApiProperty()
-	@IsNotEmpty({ message: 'رمز عبور اجباری است' })
+	@IsNotEmpty()
 	password: string;
 }
