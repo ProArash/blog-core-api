@@ -9,11 +9,11 @@ import {
 	Query,
 } from '@nestjs/common';
 import { InquiryService } from './inquiry.service';
-import { CreateInquiryDto } from './dto/create-inquiry.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/roles.decorator';
 import { UserRoles } from '../user/entities/user.entity';
 import { RolesGuard } from '../auth/roles.guard';
+import { CreateInquiryDto } from './dto/create-inquery.dto';
 
 @Controller('inquiry')
 export class InquiryController {

@@ -15,13 +15,13 @@ export class MediaService {
 	) {}
 	async newPlanMedias(mediaUrl: string[], plan: PlanEntity) {
 		const medias = mediaUrl.map((media) =>
-			this.mediaRepo.create({ mediaUrl: media, plan }),
+			this.mediaRepo.create({ url: media, plan }),
 		);
 		await this.mediaRepo.save(medias);
 		return true;
 	}
 	async newPortfolioMedia(mediaUrl: string, portfolio: PortfolioEntity) {
-		const media = await this.mediaRepo.create({ mediaUrl, portfolio }).save();
+		const media = await this.mediaRepo.create({ url: mediaUrl, portfolio }).save();
 		return media;
 	}
 
@@ -37,7 +37,7 @@ export class MediaService {
 			medias.map(async (m) => {
 				try {
 					await fs.unlink(
-						join(__dirname, '..', '..', '..', m.mediaUrl.replace(/^\//, '')),
+						join(__dirname, '..', '..', '..', m.url.replace(/^\//, '')),
 					);
 				} catch (error) {
 					console.log(error);
@@ -60,7 +60,7 @@ export class MediaService {
 			medias.map(async (m) => {
 				try {
 					await fs.unlink(
-						join(__dirname, '..', '..', '..', m.mediaUrl.replace(/^\//, '')),
+						join(__dirname, '..', '..', '..', m.url.replace(/^\//, '')),
 					);
 				} catch (error) {
 					console.log(error);

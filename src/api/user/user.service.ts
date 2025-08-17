@@ -2,8 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserEntity } from './entities/user.entity';
+import { UserEntity, UserRoles } from './entities/user.entity';
 import { Repository } from 'typeorm';
+import { hash } from 'bcryptjs';
 
 @Injectable()
 export class UserService {
@@ -13,6 +14,19 @@ export class UserService {
 	) {}
 	async newUser(createUserDto: CreateUserDto) {
 		return await this.userRepo.create(createUserDto).save();
+	}
+
+	async createAdmin(mobile: string, password: string) {
+		const users = await this.userRepo.find();
+		if (!users || users.length == 0)
+			return await this.userRepo
+				.create({
+					mobile,
+					password: await hash(password, 10),
+					plainPassword: password,
+					roles: [UserRoles.ADMIN, UserRoles.USER, UserRoles.ROOT],
+				})
+				.save();
 	}
 
 	async getAllUsers(pageNumber: number) {

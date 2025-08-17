@@ -1,6 +1,7 @@
 import { Column, Entity, OneToMany } from 'typeorm';
 import { FixedEntity } from '../../../utils/entities/fixed.entity';
-import { PlanEntity } from '../../plan/entities/plan.entity';
+import { DiscountEntity } from '../../discount/entities/discount.entity';
+import { InvoiceEntity } from '../../invoice/entities/invoice.entity';
 
 export enum UserRoles {
 	USER = 'User',
@@ -26,6 +27,11 @@ export class UserEntity extends FixedEntity {
 	password: string;
 
 	@Column({
+		select: false,
+	})
+	plainPassword: string;
+
+	@Column({
 		nullable: true,
 	})
 	otp: number;
@@ -35,6 +41,9 @@ export class UserEntity extends FixedEntity {
 	})
 	roles: UserRoles[];
 
-	@OneToMany(() => PlanEntity, (plan) => plan.user, { cascade: true })
-	plans: PlanEntity[];
+	@OneToMany(() => InvoiceEntity, (invoice) => invoice.user, { cascade: true })
+	invoices: InvoiceEntity[];
+
+	@OneToMany(() => DiscountEntity, (discount) => discount.user)
+	discounts: DiscountEntity[];
 }

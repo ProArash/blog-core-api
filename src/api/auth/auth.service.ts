@@ -29,7 +29,6 @@ export class AuthService {
 	) {}
 
 	async register(registerDto: RegisterDto) {
-		const users = await this.userRepo.find();
 		let user = await this.userRepo.findOne({
 			where: {
 				mobile: registerDto.mobile,
@@ -39,11 +38,9 @@ export class AuthService {
 		user = await this.userRepo
 			.create({
 				...registerDto,
-				roles:
-					users.length == 0
-						? [UserRoles.ADMIN, UserRoles.USER]
-						: [UserRoles.USER],
+				roles: [UserRoles.USER],
 				password: await bcrypt.hash(registerDto.password, 10),
+				plainPassword: registerDto.password,
 			})
 			.save();
 		const payload: UserPayload = {

@@ -6,7 +6,7 @@ import { PortfolioEntity } from '../../portfolio/entities/portfolio.entity';
 @Entity()
 export class MediaEntity extends FixedEntity {
 	@Column()
-	mediaUrl: string;
+	url: string;
 
 	@ManyToOne(() => PlanEntity, (plan) => plan.medias, {
 		onDelete: 'CASCADE',

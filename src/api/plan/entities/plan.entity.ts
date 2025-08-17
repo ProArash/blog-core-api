@@ -1,9 +1,9 @@
-import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { FixedEntity } from '../../../utils/entities/fixed.entity';
-import { UserEntity } from '../../user/entities/user.entity';
 import { ContextEntity } from './context.entity';
 import { FeatureEntity } from './feature.entity';
 import { MediaEntity } from '../../media/entities/media.entity';
+import { InvoiceEntity } from '../../invoice/entities/invoice.entity';
 
 @Entity()
 export class PlanEntity extends FixedEntity {
@@ -15,9 +15,6 @@ export class PlanEntity extends FixedEntity {
 
 	@Column()
 	status: boolean;
-
-	@Column({ default: false })
-	payment_status: boolean;
 
 	@Column('text')
 	caption: string;
@@ -33,8 +30,6 @@ export class PlanEntity extends FixedEntity {
 	})
 	medias: MediaEntity[];
 
-	@ManyToOne(() => UserEntity, (user) => user.plans, {
-		onDelete: 'CASCADE',
-	})
-	user: UserEntity;
+	@OneToMany(() => InvoiceEntity, (invoice) => invoice.plan, { cascade: true })
+	invoices: InvoiceEntity;
 }
