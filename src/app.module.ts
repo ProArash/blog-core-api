@@ -27,12 +27,10 @@ import { UserService } from './api/user/user.service';
 			imports: [ConfigModule],
 			inject: [ConfigService],
 			useFactory: (configService: ConfigService) => ({
-				type: 'mysql',
+				type: 'mariadb',
 				url: configService.get<string>('DB_URL'),
 				autoLoadEntities: true,
 				synchronize: true,
-				charset: 'utf8mb4',
-				collation: 'utf8mb4_unicode_ci',
 			}),
 		}),
 		PlanModule,

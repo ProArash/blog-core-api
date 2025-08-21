@@ -46,6 +46,11 @@ export class PlanController {
 		return this.planService.getPlanById(+planId);
 	}
 
+	@Get('getPlanBySlug')
+	getPlanBySlug(@Query('slug') slug: string) {
+		return this.planService.getPlanBySlug(slug);
+	}
+
 	@UseGuards(AuthGuard('jwt'), RolesGuard)
 	@Roles(UserRoles.ADMIN)
 	@Patch('updatePlanById')

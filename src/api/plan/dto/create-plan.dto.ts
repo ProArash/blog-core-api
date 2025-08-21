@@ -2,11 +2,11 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
 
 export class CreatePlanDto {
-	@ApiProperty()
+	@ApiProperty({ example: 'some name' })
 	@IsNotEmpty()
 	name: string;
 
-	@ApiProperty()
+	@ApiProperty({ example: 'some caption' })
 	@IsNotEmpty()
 	caption: string;
 
@@ -14,9 +14,13 @@ export class CreatePlanDto {
 	@IsNotEmpty()
 	price: number;
 
+	@ApiProperty({ example: 'ecommerce-webapp' })
+	@IsNotEmpty()
+	slug: string;
+
 	@ApiProperty({ example: [{ title: 'context 1' }] })
 	@IsNotEmpty()
-	contexts: ContextDto[];
+	contexts: TitleDto[];
 
 	@ApiProperty({ example: true })
 	@IsNotEmpty()
@@ -24,13 +28,14 @@ export class CreatePlanDto {
 
 	@ApiProperty({ example: [{ title: 'Feature 1' }] })
 	@IsNotEmpty()
-	features: FeatureDto[];
+	features: TitleDto[];
+
+	@ApiProperty({ example: [{ title: 'tag1' }, { title: 'tag2' }] })
+	@IsNotEmpty()
+	tags: TitleDto[];
 }
 
-export interface FeatureDto {
-	title: string;
-}
-
-export interface ContextDto {
+class TitleDto {
+	@ApiProperty({ example: 'some title' })
 	title: string;
 }

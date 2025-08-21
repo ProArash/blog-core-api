@@ -4,6 +4,7 @@ import { ContextEntity } from './context.entity';
 import { FeatureEntity } from './feature.entity';
 import { MediaEntity } from '../../media/entities/media.entity';
 import { InvoiceEntity } from '../../invoice/entities/invoice.entity';
+import { TagEntity } from './tag.entity';
 
 @Entity()
 export class PlanEntity extends FixedEntity {
@@ -19,6 +20,11 @@ export class PlanEntity extends FixedEntity {
 	@Column('text')
 	caption: string;
 
+	@Column({
+		unique: true,
+	})
+	slug: string;
+
 	@OneToMany(() => FeatureEntity, (feature) => feature.plan, { cascade: true })
 	features: FeatureEntity[];
 
@@ -32,4 +38,7 @@ export class PlanEntity extends FixedEntity {
 
 	@OneToMany(() => InvoiceEntity, (invoice) => invoice.plan, { cascade: true })
 	invoices: InvoiceEntity;
+
+	@OneToMany(() => TagEntity, (tag) => tag.plan, { cascade: true })
+	tags: TagEntity[];
 }

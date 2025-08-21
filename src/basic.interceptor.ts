@@ -7,8 +7,9 @@ import {
 import { map, Observable } from 'rxjs';
 
 export interface IBasicResponse<T = undefined> {
-	message: string;
+	message?: string;
 	count?: number;
+	totalCount?: number;
 	data?: T;
 }
 
@@ -21,16 +22,28 @@ export class BasicInterceptor<T>
 		next: CallHandler,
 	): Observable<IBasicResponse<T>> {
 		return next.handle().pipe(
-			map((data: T) => {
+			map((payload: T) => {
 				let count: number | undefined = undefined;
-				if (Array.isArray(data)) {
-					count = data.length;
+				let totalCount: number | undefined = undefined;
+				let responseData: T | undefined = payload;
+				const newPayload = payload as IBasicResponse<T>;
+
+				if (newPayload.totalCount) {
+					totalCount = newPayload.totalCount;
+					responseData = newPayload.data;
+				} else {
+					responseData = newPayload as T;
+					if (Array.isArray(newPayload.data)) {
+						count = newPayload.data.length;
+					}
 				}
-				const noData = typeof data == 'boolean';
+
+				const noData = typeof payload == 'boolean';
 				return {
 					message: 'OK',
 					count,
-					data: noData ? undefined : data,
+					totalCount,
+					data: noData ? undefined : responseData,
 				};
 			}),
 		);

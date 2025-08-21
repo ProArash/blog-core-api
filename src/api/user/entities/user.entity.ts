@@ -31,11 +31,6 @@ export class UserEntity extends FixedEntity {
 	})
 	plainPassword: string;
 
-	@Column({
-		nullable: true,
-	})
-	otp: number;
-
 	@Column('simple-array', {
 		nullable: true,
 	})

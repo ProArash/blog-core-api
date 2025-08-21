@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+	ConflictException,
+	Injectable,
+	NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,7 +17,20 @@ export class UserService {
 		private userRepo: Repository<UserEntity>,
 	) {}
 	async newUser(createUserDto: CreateUserDto) {
-		return await this.userRepo.create(createUserDto).save();
+		const user = await this.userRepo.findOne({
+			where: {
+				mobile: createUserDto.mobile,
+			},
+		});
+		if (user) throw new ConflictException('این شماره موبایل قبلا ثبت شده است');
+		return await this.userRepo
+			.create({
+				mobile: createUserDto.mobile,
+				password: await hash(createUserDto.password, 10),
+				plainPassword: createUserDto.password,
+				roles: [UserRoles.USER],
+			})
+			.save();
 	}
 
 	async createAdmin(mobile: string, password: string) {

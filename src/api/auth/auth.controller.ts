@@ -14,7 +14,6 @@ import { Request, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import { UserPayload } from '../../utils/user.payload';
-import { RegisterDto } from './dto/register-dto';
 
 @Controller('auth')
 export class AuthController {
@@ -26,7 +25,7 @@ export class AuthController {
 	@Post('signIn')
 	async signIn(
 		@Body(new ValidationPipe()) signInDto: SignInDto,
-		@Res() res: Response,
+		@Res({ passthrough: true }) res: Response,
 	) {
 		const auth = await this.authService.signIn(signInDto);
 
@@ -42,17 +41,17 @@ export class AuthController {
 			secure: isLocal ? false : true,
 			maxAge: 1000 * 60 * 60 * 24 * 90,
 		});
-		res.status(200).json({
+		return {
 			message: 'با موفقیت وارد شدید',
-		});
+		};
 	}
 
-	@Post('register')
-	async register(
-		@Body(new ValidationPipe()) registerDto: RegisterDto,
-		@Res() res: Response,
+	@Post('registerUser')
+	async registerUser(
+		@Body(new ValidationPipe()) signInDto: SignInDto,
+		@Res({ passthrough: true }) res: Response,
 	) {
-		const auth = await this.authService.register(registerDto);
+		const auth = await this.authService.registerUser(signInDto);
 
 		const isLocal = this.configService.get<string>('ENV') == 'dev';
 
@@ -66,9 +65,9 @@ export class AuthController {
 			secure: isLocal ? false : true,
 			maxAge: 1000 * 60 * 60 * 24 * 90,
 		});
-		res.status(200).json({
+		return {
 			message: 'با موفقیت وارد شدید',
-		});
+		};
 	}
 
 	@UseGuards(AuthGuard('jwt'))
@@ -80,7 +79,7 @@ export class AuthController {
 
 	@UseGuards(AuthGuard('jwt'))
 	@Post('logOut')
-	logOut(@Res() res: Response) {
+	logOut(@Res({ passthrough: true }) res: Response) {
 		const isLocal = this.configService.get<string>('ENV') == 'dev';
 		res.clearCookie('refresh_token', {
 			path: '/',
@@ -94,8 +93,8 @@ export class AuthController {
 				? 'localhost'
 				: (this.configService.get<string>('DOMAIN') ?? ''),
 		});
-		res.status(200).json({
-			message: 'از حساب خود خارج شدید',
-		});
+		return {
+			message: 'با موفقیت خارج شدید',
+		};
 	}
 }

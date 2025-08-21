@@ -6,7 +6,11 @@ export class SignInDto {
 	@IsNotEmpty()
 	mobile: string;
 
-	@ApiProperty({ example: 'somePassword123' })
+	@ApiProperty({ example: 'password12345' })
 	@IsNotEmpty()
 	password: string;
+
+	@ApiProperty({ example: 'Morty Smith' })
+	@IsNotEmpty()
+	name: string;
 }

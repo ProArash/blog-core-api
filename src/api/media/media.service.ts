@@ -21,7 +21,9 @@ export class MediaService {
 		return true;
 	}
 	async newPortfolioMedia(mediaUrl: string, portfolio: PortfolioEntity) {
-		const media = await this.mediaRepo.create({ url: mediaUrl, portfolio }).save();
+		const media = await this.mediaRepo
+			.create({ url: mediaUrl, portfolio })
+			.save();
 		return media;
 	}
 

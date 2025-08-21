@@ -7,10 +7,16 @@ import { UserModule } from '../user/user.module';
 import { FeatureEntity } from './entities/feature.entity';
 import { ContextEntity } from './entities/context.entity';
 import { MediaModule } from '../media/media.module';
+import { TagEntity } from './entities/tag.entity';
 
 @Module({
 	imports: [
-		TypeOrmModule.forFeature([PlanEntity, FeatureEntity, ContextEntity]),
+		TypeOrmModule.forFeature([
+			PlanEntity,
+			FeatureEntity,
+			ContextEntity,
+			TagEntity,
+		]),
 		UserModule,
 		MediaModule,
 	],

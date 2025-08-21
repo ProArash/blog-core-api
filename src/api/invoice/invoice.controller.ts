@@ -1,11 +1,12 @@
-import { Controller, Get, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { InvoiceService } from './invoice.service';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { UserRoles } from '../user/entities/user.entity';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { UserPayload } from '../../utils/user.payload';
+import { ApiQuery } from '@nestjs/swagger';
 
 @Controller('invoice')
 export class InvoiceController {
@@ -13,18 +14,38 @@ export class InvoiceController {
 
 	@UseGuards(AuthGuard('jwt'), RolesGuard)
 	@Roles(UserRoles.USER)
-	@Post('new')
-	async newInvoice(@Query('planId') planId: string, @Req() req: Request) {
+	@Get('newPlanInvoice')
+	async newPlanInvoice(@Query('planId') planId: string, @Req() req: Request) {
 		const user = req.user as UserPayload;
-		return await this.invoiceService.newInvoice(user.id, +planId);
+		return await this.invoiceService.newPlanInvoice(user.id, +planId);
 	}
 
-	@Get('getAll')
 	@UseGuards(AuthGuard('jwt'), RolesGuard)
 	@Roles(UserRoles.USER)
-	async allUserInvoices(@Query('page') page: string, @Req() req: Request) {
+	@Get('getUserInvoices')
+	@ApiQuery({
+		name: 'pageNumber',
+		default: 1,
+	})
+	async getUserInvoices(
+		@Query('pageNumber')
+		pageNumber: number,
+		@Req() req: Request,
+	) {
 		const user = req.user as UserPayload;
-		return await this.invoiceService.getAllInvoices(+page, user.id);
+		return await this.invoiceService.getUserInvoices(pageNumber, user.id);
+	}
+
+	@UseGuards(AuthGuard('jwt'), RolesGuard)
+	@Roles(UserRoles.USER)
+	@Get('getUserInvoiceById')
+	async getUserInvoiceById(
+		@Query('invoiceId')
+		invoiceId: number,
+		@Req() req: Request,
+	) {
+		const user = req.user as UserPayload;
+		return await this.invoiceService.getUserInvoiceById(invoiceId, user.id);
 	}
 
 	@Get('callback')
@@ -33,7 +54,13 @@ export class InvoiceController {
 		@Query('status') status: string,
 		@Query('trackId') trackId: string,
 		@Query('orderId') orderId: string,
+		@Res() res: Response,
 	) {
-		return await this.invoiceService.handleCallback(trackId, orderId, +success);
+		const invoice = await this.invoiceService.handleCallback(
+			trackId,
+			orderId,
+			+success,
+		);
+		return res.redirect(`http://localhost:3000/invoice/${invoice.id}`);
 	}
 }

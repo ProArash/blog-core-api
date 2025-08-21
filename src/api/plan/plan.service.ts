@@ -29,10 +29,13 @@ export class PlanService {
 					title: true,
 				},
 				status: true,
+				slug: true,
 			},
 			relations: {
 				contexts: true,
 				features: true,
+				tags: true,
+				medias: true,
 			},
 		});
 		return plans;
@@ -47,6 +50,23 @@ export class PlanService {
 				contexts: true,
 				features: true,
 				medias: true,
+				tags: true,
+			},
+		});
+		if (!plan) throw new NotFoundException('پلن یافت نشد');
+		return plan;
+	}
+
+	async getPlanBySlug(slug: string) {
+		const plan = await this.planRepo.findOne({
+			where: {
+				slug,
+			},
+			relations: {
+				contexts: true,
+				features: true,
+				medias: true,
+				tags: true,
 			},
 		});
 		if (!plan) throw new NotFoundException('پلن یافت نشد');

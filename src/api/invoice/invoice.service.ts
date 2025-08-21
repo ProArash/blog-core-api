@@ -27,17 +27,8 @@ export class InvoiceService {
 		private planService: PlanService,
 	) {}
 
-	async getAllInvoices(page: number, userId: number) {
-		return await this.repo.find({
-			where: {
-				user: {
-					id: userId,
-				},
-			},
-		});
-	}
-
-	async newInvoice(userId: number, planId: number) {
+	async newPlanInvoice(userId: number, planId: number) {
+		const plan = await this.planService.getPlanById(planId);
 		const invoice = await this.repo
 			.create({
 				user: {
@@ -46,26 +37,15 @@ export class InvoiceService {
 				plan: {
 					id: planId,
 				},
+				amount: plan.price,
 			})
 			.save();
-		const plan = await this.planService.getPlanById(planId);
-
 		return await this.newPaymentUrl({
-			amount: plan.price,
-			description: `Description for plan #${planId}`,
+			amount: plan.price * 10,
+			callbackUrl,
 			merchant: MERCHANT_CODE,
 			orderId: invoice.id.toString(),
-			callbackUrl,
-		});
-	}
-
-	async getUserInvoicesById(userId: number) {
-		return await this.repo.find({
-			where: {
-				user: {
-					id: userId,
-				},
-			},
+			description: `سفارش شماره #${invoice.id}`,
 		});
 	}
 
@@ -84,10 +64,48 @@ export class InvoiceService {
 			},
 		});
 		if (!invoice) throw new NotFoundException('سفارش یافت نشد.');
-		invoice.trackId = trackId;
 		invoice.status = success == 1 ? PayStatus.PAYED : PayStatus.CANCELLED;
+		invoice.trackId = trackId;
 		await invoice.save();
 		return invoice;
+	}
+
+	async getUserInvoices(pageNumber: number, userId: number) {
+		const limit = 20;
+		const skip = (pageNumber - 1) * limit;
+		const [invoices, totalCount] = await this.repo.findAndCount({
+			where: {
+				user: {
+					id: userId,
+				},
+			},
+			relations: {
+				plan: true,
+			},
+			order: {
+				createdAt: 'DESC',
+			},
+			take: limit,
+			skip,
+		});
+		return {
+			totalCount,
+			data: invoices,
+		};
+	}
+
+	async getUserInvoiceById(invoiceId: number, userId: number) {
+		return await this.repo.findOne({
+			where: {
+				id: invoiceId,
+				user: {
+					id: userId,
+				},
+			},
+			relations: {
+				plan: true,
+			},
+		});
 	}
 
 	async newPaymentUrl(payDto: PaymentUrlRequest) {
@@ -103,8 +121,6 @@ export class InvoiceService {
 			'https://gateway.zibal.ir/v1/request',
 			body,
 		);
-		console.log(newPaymentReq.data);
-
 		return {
 			url: `https://gateway.zibal.ir/start/${newPaymentReq.data.trackId}`,
 		};
