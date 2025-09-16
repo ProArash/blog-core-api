@@ -44,6 +44,7 @@ export class CartService {
 			0,
 		);
 		return {
+			cartId: cart.id,
 			total,
 			items: cart.cartItems,
 		};
@@ -51,8 +52,10 @@ export class CartService {
 
 	async addItemToCart(userId: number, productId: number) {
 		const cart = await this.getOrCreateCart(userId);
-		const isExist = cart.cartItems.some((v) => v.product.id == productId);
-		if (isExist) throw new ConflictException('محصول در سبد خرید هست!');
+		if (cart.cartItems && cart.cartItems.length > 0) {
+			const isExist = cart.cartItems.some((v) => v.product.id == productId);
+			if (isExist) throw new ConflictException('محصول در سبد خرید هست!');
+		}
 		const product = await this.productService.getProductById(productId);
 		await this.cartItemRepo
 			.create({

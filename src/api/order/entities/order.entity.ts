@@ -4,9 +4,9 @@ import { IOrderItem, OrderItem } from './order.item.entity';
 import { IUser, User } from '../../user/entities/user.entity';
 
 export enum OrderStatus {
-	PENDING = 'درحال پرداخت',
-	PAYED = 'پرداخت شده',
-	CANCELLED = 'پرداخت ناموفق',
+	PENDING = 1,
+	PAYED = 2,
+	CANCELLED = 3,
 }
 
 export interface IOrder {

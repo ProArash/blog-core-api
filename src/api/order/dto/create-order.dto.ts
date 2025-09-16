@@ -1,13 +1,8 @@
 import { IsNotEmpty } from 'class-validator';
-import { IOrder, OrderStatus } from '../entities/order.entity';
+import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateOrderDto implements Partial<IOrder> {
+export class CreateOrderDto {
+	@ApiProperty({ example: 1 })
 	@IsNotEmpty()
-	status: OrderStatus;
-
-	@IsNotEmpty()
-	totalAmount: number;
-
-	@IsNotEmpty()
-	trackId: string;
+	cartId: number;
 }

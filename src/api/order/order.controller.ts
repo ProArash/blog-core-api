@@ -1,34 +1,76 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+	Controller,
+	Get,
+	Post,
+	Body,
+	UseGuards,
+	ValidationPipe,
+	Req,
+	Query,
+	ParseIntPipe,
+	Put,
+	Res,
+} from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { Roles } from '../auth/roles.decorator';
+import { UserRole } from '../user/entities/user.entity';
+import { Request, Response } from 'express';
+import { UserPayload } from '../../utils/user.payload';
 import { UpdateOrderDto } from './dto/update-order.dto';
 
 @Controller('order')
+@UseGuards(AuthGuard('jwt'))
+@Roles(UserRole.USER)
 export class OrderController {
-  constructor(private readonly orderService: OrderService) {}
+	constructor(private readonly orderService: OrderService) {}
 
-  @Post()
-  create(@Body() createOrderDto: CreateOrderDto) {
-    return this.orderService.create(createOrderDto);
-  }
+	@Post('newOrder')
+	async newOrder(
+		@Body(new ValidationPipe()) dto: CreateOrderDto,
+		@Req() req: Request,
+	) {
+		const { id: userId } = req.user as UserPayload;
+		return await this.orderService.createOrder(userId);
+	}
 
-  @Get()
-  findAll() {
-    return this.orderService.findAll();
-  }
+	@Get('getAllOrders')
+	async getAllOrders(
+		@Query('page', ParseIntPipe) page: number,
+		@Req() req: Request,
+	) {
+		const { id: userId } = req.user as UserPayload;
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.orderService.findOne(+id);
-  }
+		return await this.orderService.getAllOrders(userId, page);
+	}
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    return this.orderService.update(+id, updateOrderDto);
-  }
+	@Get('getOrderById')
+	async getOrderById(@Query('orderId', ParseIntPipe) orderId: number) {
+		return await this.orderService.getOrderById(orderId);
+	}
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.orderService.remove(+id);
-  }
+	@Get('callback')
+	async callback(
+		@Query('success') success: number,
+		@Query('status') status: number,
+		@Query('trackId') trackId: number,
+		@Query('orderId') orderId: string,
+		@Res() res: Response,
+	) {
+		if (success != 1) {
+			res.redirect(
+				`http://localhost:3000/order/?success=false&orderId=${orderId}&trackId=${trackId}`,
+			);
+		}
+		await this.orderService.handleCallback(status, trackId, +orderId);
+		res.redirect(
+			`http://localhost:3000/order/?success=true&orderId=${orderId}&trackId=${trackId}`,
+		);
+	}
+
+	@Put('updateOrder')
+	async updateOrder(@Body(new ValidationPipe()) dto: UpdateOrderDto) {
+		return await this.orderService.updateOrderById(dto);
+	}
 }

@@ -1,10 +1,21 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+	BadRequestException,
+	Injectable,
+	NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from './entities/order.entity';
 import { Repository } from 'typeorm';
 import { OrderItem } from './entities/order.item.entity';
 import { UserService } from '../user/user.service';
 import { CartService } from '../cart/cart.service';
+import { UpdateOrderDto } from './dto/update-order.dto';
+import axios from 'axios';
+import {
+	ZibalNewUrlRequest,
+	ZibalNewUrlResponse,
+	ZibalVerifyResponse,
+} from './dto/zibal.dto';
 
 @Injectable()
 export class OrderService {
@@ -17,8 +28,8 @@ export class OrderService {
 		private cartService: CartService,
 	) {}
 
-	async createOrder(userId: number, cartId: number) {
-		const cart = await this.cartService.getCart(cartId);
+	async createOrder(userId: number) {
+		const cart = await this.cartService.getCart(userId);
 		const user = await this.userService.getUserById(userId);
 		if (cart.items.length == 0)
 			throw new BadRequestException('سبد خرید شما خالی است!');
@@ -36,7 +47,84 @@ export class OrderService {
 			order.orderItems.push(orderItem);
 		}
 		const savedOrder = await this.orderRepo.save(order);
-		await this.cartService.clearCart(cartId);
-		return savedOrder;
+		return {
+			paymentUrl: await this.generatePaymentUrl(
+				savedOrder.totalAmount,
+				savedOrder.id.toString(),
+			),
+			order: savedOrder,
+		};
+	}
+
+	async getAllOrders(userId: number, page: number) {
+		const take = 20;
+		const skip = (page - 1) * take;
+		return await this.orderRepo.find({
+			take,
+			skip,
+			where: {
+				user: {
+					id: userId,
+				},
+			},
+			order: {
+				createdAt: 'DESC',
+			},
+		});
+	}
+	async getOrderById(orderId: number) {
+		const order = await this.orderRepo.findOne({
+			where: {
+				id: orderId,
+			},
+		});
+		if (!order) throw new NotFoundException('سفارش یافت نشد.');
+		return order;
+	}
+
+	async updateOrderById(dto: UpdateOrderDto) {
+		const order = await this.getOrderById(dto.orderId);
+		order.status = dto.status;
+		await order.save();
+		return true;
+	}
+
+	async generatePaymentUrl(amount: number, orderId: string) {
+		const newUrlBody: ZibalNewUrlRequest = {
+			merchant: 'zibal',
+			orderId,
+			amount: amount * 10,
+			description: 'some description',
+			callbackUrl: 'http://localhost:4000/order/callback',
+		};
+		const request = await axios.post(
+			'https://gateway.zibal.ir/v1/request',
+			newUrlBody,
+		);
+		const result: ZibalNewUrlResponse = request.data as ZibalNewUrlResponse;
+		await this.orderRepo.update(+orderId, {
+			trackId: result.trackId.toString(),
+		});
+		return `https://gateway.zibal.ir/start/${result.trackId}`;
+	}
+
+	async handleCallback(status: number, trackId: number, orderId: number) {
+		const dto = {
+			merchant: 'zibal',
+			trackId,
+		};
+		console.log(dto);
+
+		const verifyReq = await axios.post(
+			'https://gateway.zibal.ir/v1/verify',
+			dto,
+		);
+		const result: ZibalVerifyResponse = verifyReq.data as ZibalVerifyResponse;
+		console.log(verifyReq.data);
+
+		await this.orderRepo.update(+orderId, {
+			trackId: result.trackId.toString(),
+		});
+		return true;
 	}
 }
