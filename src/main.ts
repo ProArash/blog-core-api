@@ -1,10 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import * as cookieParser from 'cookie-parser';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { BasicInterceptor } from './basic.interceptor';
 import { HttpException, HttpStatus, ValidationPipe } from '@nestjs/common';
 import { ValidationError } from 'class-validator';
+import cookieParser from 'cookie-parser';
 
 const PORT = process.env.PORT || 3000;
 
@@ -53,7 +53,6 @@ async function bootstrap() {
 }
 bootstrap()
 	.then(() => {
-		console.clear();
 		console.log(`server is running on port ${PORT}`);
 	})
 	.catch((err) => console.log(err));

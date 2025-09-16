@@ -5,7 +5,7 @@ import {
 	Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { UserRoles } from '../user/entities/user.entity';
+import { UserRole } from '../user/entities/user.entity';
 import { ROLES_KEYS } from './roles.decorator';
 import { Request } from 'express';
 import { UserPayload } from '../../utils/user.payload';
@@ -18,7 +18,7 @@ export class RolesGuard implements CanActivate {
 		private userService: UserService,
 	) {}
 	async canActivate(context: ExecutionContext): Promise<boolean> {
-		const requiredRoles = this.reflector.getAllAndOverride<UserRoles[]>(
+		const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(
 			ROLES_KEYS,
 			[context.getHandler(), context.getClass()],
 		);

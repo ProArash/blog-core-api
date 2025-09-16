@@ -1,18 +1,14 @@
 import { Module, OnApplicationBootstrap } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { PlanModule } from './api/plan/plan.module';
 import { UserModule } from './api/user/user.module';
 import { AuthModule } from './api/auth/auth.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { BlogModule } from './api/blog/blog.module';
-import { MediaModule } from './api/media/media.module';
-import { InquiryModule } from './api/inquiry/inquiry.module';
-import { PortfolioModule } from './api/portfolio/portfolio.module';
-import { DiscountModule } from './api/discount/discount.module';
-import { InvoiceModule } from './api/invoice/invoice.module';
 import { UserService } from './api/user/user.service';
+import { ProductModule } from './api/product/product.module';
+import { CartModule } from './api/cart/cart.module';
+import { OrderModule } from './api/order/order.module';
 
 @Module({
 	imports: [
@@ -33,15 +29,11 @@ import { UserService } from './api/user/user.service';
 				synchronize: true,
 			}),
 		}),
-		PlanModule,
 		UserModule,
 		AuthModule,
-		BlogModule,
-		MediaModule,
-		InquiryModule,
-		PortfolioModule,
-		DiscountModule,
-		InvoiceModule,
+		ProductModule,
+		CartModule,
+		OrderModule,
 	],
 })
 export class AppModule implements OnApplicationBootstrap {

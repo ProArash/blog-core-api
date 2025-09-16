@@ -5,12 +5,12 @@ import {
 } from '@nestjs/common';
 import { SignInDto } from './dto/signin-dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserEntity, UserRoles } from '../user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { UserPayload } from '../../utils/user.payload';
 import { UserService } from '../user/user.service';
 import * as bcryptjs from 'bcryptjs';
+import { User, UserRole } from '../user/entities/user.entity';
 
 export interface IAuthResponse {
 	access_token: string;
@@ -20,8 +20,8 @@ export interface IAuthResponse {
 @Injectable()
 export class AuthService {
 	constructor(
-		@InjectRepository(UserEntity)
-		private userRepo: Repository<UserEntity>,
+		@InjectRepository(User)
+		private userRepo: Repository<User>,
 		private userService: UserService,
 		private jwtService: JwtService,
 	) {}
@@ -49,7 +49,7 @@ export class AuthService {
 			mobile: createDto.mobile,
 			name: createDto.name,
 			password: createDto.password,
-			roles: [UserRoles.USER],
+			roles: [UserRole.USER],
 		});
 
 		const payload: UserPayload = {
@@ -65,7 +65,7 @@ export class AuthService {
 		};
 	}
 
-	async getCurrentUser(userId: number): Promise<UserEntity> {
+	async getCurrentUser(userId: number): Promise<User> {
 		const user = await this.userRepo.findOne({
 			where: {
 				id: userId,

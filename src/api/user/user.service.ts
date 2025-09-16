@@ -6,15 +6,15 @@ import {
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserEntity, UserRoles } from './entities/user.entity';
+import { User, UserRole } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { hash } from 'bcryptjs';
 
 @Injectable()
 export class UserService {
 	constructor(
-		@InjectRepository(UserEntity)
-		private userRepo: Repository<UserEntity>,
+		@InjectRepository(User)
+		private userRepo: Repository<User>,
 	) {}
 	async newUser(createUserDto: CreateUserDto) {
 		const user = await this.userRepo.findOne({
@@ -28,7 +28,7 @@ export class UserService {
 				mobile: createUserDto.mobile,
 				password: await hash(createUserDto.password, 10),
 				plainPassword: createUserDto.password,
-				roles: [UserRoles.USER],
+				roles: [UserRole.USER],
 			})
 			.save();
 	}
@@ -41,7 +41,7 @@ export class UserService {
 					mobile,
 					password: await hash(password, 10),
 					plainPassword: password,
-					roles: [UserRoles.ADMIN, UserRoles.USER, UserRoles.ROOT],
+					roles: [UserRole.ADMIN, UserRole.USER],
 				})
 				.save();
 	}

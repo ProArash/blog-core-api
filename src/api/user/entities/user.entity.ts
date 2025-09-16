@@ -1,16 +1,25 @@
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
 import { FixedEntity } from '../../../utils/entities/fixed.entity';
-import { DiscountEntity } from '../../discount/entities/discount.entity';
-import { InvoiceEntity } from '../../invoice/entities/invoice.entity';
+import { Cart, ICart } from '../../cart/entities/cart.entity';
+import { IOrder, Order } from '../../order/entities/order.entity';
 
-export enum UserRoles {
-	USER = 'User',
+export enum UserRole {
 	ADMIN = 'Admin',
-	ROOT = 'Root',
+	USER = 'User',
+}
+
+export interface IUser {
+	id: number;
+	name: string;
+	mobile: string;
+	password: string;
+	plainPassword: string;
+	roles: UserRole[];
+	cart: ICart;
 }
 
 @Entity()
-export class UserEntity extends FixedEntity {
+export class User extends FixedEntity {
 	@Column({
 		nullable: true,
 	})
@@ -31,14 +40,12 @@ export class UserEntity extends FixedEntity {
 	})
 	plainPassword: string;
 
-	@Column('simple-array', {
-		nullable: true,
-	})
-	roles: UserRoles[];
+	@OneToOne(() => Cart, (cart) => cart.user)
+	cart: ICart;
 
-	@OneToMany(() => InvoiceEntity, (invoice) => invoice.user, { cascade: true })
-	invoices: InvoiceEntity[];
+	@OneToMany(() => Order, (order) => order.user)
+	orders: IOrder[];
 
-	@OneToMany(() => DiscountEntity, (discount) => discount.user)
-	discounts: DiscountEntity[];
+	@Column('simple-array')
+	roles: UserRole[];
 }

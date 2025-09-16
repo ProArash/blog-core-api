@@ -16,7 +16,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
-import { UserRoles } from './entities/user.entity';
+import { UserRole } from './entities/user.entity';
 import { Request } from 'express';
 import { UserPayload } from '../../utils/user.payload';
 
@@ -25,25 +25,31 @@ import { UserPayload } from '../../utils/user.payload';
 export class UserController {
 	constructor(private readonly userService: UserService) {}
 
-	@Roles(UserRoles.ADMIN)
+	@Get('profile')
+	getProfile() {
+		return {
+			msg: 'ok',
+		};
+	}
+	@Roles(UserRole.ADMIN)
 	@Post('newUser')
 	create(@Body() createUserDto: CreateUserDto) {
 		return this.userService.newUser(createUserDto);
 	}
 
-	@Roles(UserRoles.ADMIN)
+	@Roles(UserRole.ADMIN)
 	@Get('getAllUsers')
 	findAll(@Query('pageNumber') pageNumber: string) {
 		return this.userService.getAllUsers(+pageNumber);
 	}
 
-	@Roles(UserRoles.ADMIN)
+	@Roles(UserRole.ADMIN)
 	@Get('getUserById')
 	findOne(@Query('userId') userId: string) {
 		return this.userService.getUserById(+userId);
 	}
 
-	@Roles(UserRoles.ADMIN)
+	@Roles(UserRole.ADMIN)
 	@Patch('updateUserById')
 	update(
 		@Query('userId') userId: string,
@@ -52,13 +58,13 @@ export class UserController {
 		return this.userService.updateUserById(+userId, updateUserDto);
 	}
 
-	@Roles(UserRoles.ADMIN)
+	@Roles(UserRole.ADMIN)
 	@Delete('deleteUserById')
 	remove(@Query('userId') userId: string) {
 		return this.userService.removeUserById(+userId);
 	}
 
-	@Roles(UserRoles.USER)
+	@Roles(UserRole.USER)
 	@Patch('editProfile')
 	async updateCurrentProfile(
 		@Body(new ValidationPipe()) userDto: UpdateUserDto,
