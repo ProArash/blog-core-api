@@ -23,20 +23,9 @@ export class BasicInterceptor<T>
 	): Observable<IBasicResponse<T>> {
 		return next.handle().pipe(
 			map((payload: T) => {
-				let count: number | undefined = undefined;
-				let totalCount: number | undefined = undefined;
-				let responseData: T | undefined = payload;
-				const newPayload = payload as IBasicResponse<T>;
-
-				if (newPayload.totalCount) {
-					totalCount = newPayload.totalCount;
-					responseData = newPayload.data;
-				} else {
-					responseData = newPayload as T;
-					if (Array.isArray(newPayload.data)) {
-						count = newPayload.data.length;
-					}
-				}
+				const count: number | undefined = undefined;
+				const totalCount: number | undefined = undefined;
+				const responseData: T | undefined = payload;
 
 				const noData = typeof payload == 'boolean';
 				return {

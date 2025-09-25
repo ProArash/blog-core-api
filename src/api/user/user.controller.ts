@@ -25,12 +25,13 @@ import { UserPayload } from '../../utils/user.payload';
 export class UserController {
 	constructor(private readonly userService: UserService) {}
 
+	@Roles(UserRole.USER)
 	@Get('profile')
-	getProfile() {
-		return {
-			msg: 'ok',
-		};
+	async getProfile(@Req() req: Request) {
+		const { id: userId } = req.user as UserPayload;
+		return await this.userService.getProfile(userId);
 	}
+
 	@Roles(UserRole.ADMIN)
 	@Post('newUser')
 	create(@Body() createUserDto: CreateUserDto) {

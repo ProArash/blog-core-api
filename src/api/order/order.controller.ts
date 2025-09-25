@@ -58,14 +58,9 @@ export class OrderController {
 		@Query('orderId') orderId: string,
 		@Res() res: Response,
 	) {
-		if (success != 1) {
-			res.redirect(
-				`http://localhost:3000/order/?success=false&orderId=${orderId}&trackId=${trackId}`,
-			);
-		}
 		await this.orderService.handleCallback(status, trackId, +orderId);
 		res.redirect(
-			`http://localhost:3000/order/?success=true&orderId=${orderId}&trackId=${trackId}`,
+			`http://localhost:3000/order/?success=${status == 1 ? true : false}&orderId=${orderId}&trackId=${trackId}`,
 		);
 	}
 

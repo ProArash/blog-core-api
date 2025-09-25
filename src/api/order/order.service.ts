@@ -4,7 +4,7 @@ import {
 	NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Order } from './entities/order.entity';
+import { Order, OrderStatus } from './entities/order.entity';
 import { Repository } from 'typeorm';
 import { OrderItem } from './entities/order.item.entity';
 import { UserService } from '../user/user.service';
@@ -50,9 +50,8 @@ export class OrderService {
 		return {
 			paymentUrl: await this.generatePaymentUrl(
 				savedOrder.totalAmount,
-				savedOrder.id.toString(),
+				`${savedOrder.id.toString()}_${cart.cartId}`,
 			),
-			order: savedOrder,
 		};
 	}
 
@@ -68,7 +67,7 @@ export class OrderService {
 				},
 			},
 			order: {
-				createdAt: 'DESC',
+				updatedAt: 'DESC',
 			},
 		});
 	}
@@ -108,23 +107,29 @@ export class OrderService {
 		return `https://gateway.zibal.ir/start/${result.trackId}`;
 	}
 
-	async handleCallback(status: number, trackId: number, orderId: number) {
+	async handleCallback(status: number, trackId: number, orderId: string) {
+		const [oId, cartId] = orderId.split('_');
 		const dto = {
 			merchant: 'zibal',
 			trackId,
 		};
-		console.log(dto);
-
 		const verifyReq = await axios.post(
 			'https://gateway.zibal.ir/v1/verify',
 			dto,
 		);
-		const result: ZibalVerifyResponse = verifyReq.data as ZibalVerifyResponse;
-		console.log(verifyReq.data);
-
-		await this.orderRepo.update(+orderId, {
-			trackId: result.trackId.toString(),
+		if (verifyReq.status != 200) {
+			throw new BadRequestException('تایید تراکنش ناموفق');
+		}
+		const verifyResponse = verifyReq.data as ZibalVerifyResponse;
+		await this.updateOrderById({
+			orderId: +oId,
+			status:
+				verifyResponse.status == 1 ? OrderStatus.PAID : OrderStatus.CANCELLED,
 		});
+		if (verifyResponse.status == 1) {
+			await this.cartService.clearCart(+cartId);
+		}
+
 		return true;
 	}
 }

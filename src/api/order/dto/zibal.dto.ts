@@ -13,6 +13,14 @@ export interface ZibalNewUrlResponse {
 }
 
 export interface ZibalVerifyResponse {
-	merchant: string;
-	trackId: number;
+	message: string;
+	result: number;
+	refNumber: string;
+	paidAt: Date;
+	status: number;
+	amount: number;
+	orderId: string;
+	description: string;
+	cardNumber: string;
+	multiplexingInfos: string[];
 }

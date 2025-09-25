@@ -26,6 +26,7 @@ export class UserService {
 		return await this.userRepo
 			.create({
 				mobile: createUserDto.mobile,
+				name: createUserDto.name,
 				password: await hash(createUserDto.password, 10),
 				plainPassword: createUserDto.password,
 				roles: [UserRole.USER],
@@ -84,6 +85,12 @@ export class UserService {
 
 	async updateUserById(userId: number, updateUserDto: UpdateUserDto) {
 		return await this.userRepo.update(userId, { ...updateUserDto });
+	}
+
+	async getProfile(userId: number) {
+		return await this.userRepo.findOne({
+			where: { id: userId },
+		});
 	}
 
 	async updateCurrentUserById(userId: number, updateUserDto: UpdateUserDto) {
