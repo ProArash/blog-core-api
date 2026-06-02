@@ -14,9 +14,10 @@ export interface IBasicResponse<T = undefined> {
 }
 
 @Injectable()
-export class BasicInterceptor<T>
-	implements NestInterceptor<T, IBasicResponse<T>>
-{
+export class BasicInterceptor<T> implements NestInterceptor<
+	T,
+	IBasicResponse<T>
+> {
 	intercept(
 		context: ExecutionContext,
 		next: CallHandler,

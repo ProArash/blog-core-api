@@ -1,8 +1,11 @@
+// src/api/auth/roles.guard.ts
+
 import {
 	CanActivate,
 	ExecutionContext,
 	ForbiddenException,
 	Injectable,
+	UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { UserRole } from '../user/entities/user.entity';
@@ -17,20 +20,34 @@ export class RolesGuard implements CanActivate {
 		private reflector: Reflector,
 		private userService: UserService,
 	) {}
+
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 		const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(
 			ROLES_KEYS,
 			[context.getHandler(), context.getClass()],
 		);
+
+		if (!requiredRoles) {
+			return true;
+		}
+
 		const request: Request = context.switchToHttp().getRequest();
+
+		if (!request.user) {
+			throw new UnauthorizedException('User not authenticated');
+		}
+
 		const { id } = request.user as UserPayload;
 		const userData = await this.userService.getUserById(id);
-		if (!requiredRoles) return true;
+
 		const hasPermission = userData.roles.some((role) =>
 			requiredRoles.includes(role),
 		);
-		if (!hasPermission)
-			throw new ForbiddenException('به این بخش دسترسی ندارید');
+
+		if (!hasPermission) {
+			throw new ForbiddenException('Insufficient permission');
+		}
+
 		return true;
 	}
 }

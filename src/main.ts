@@ -31,7 +31,7 @@ async function bootstrap() {
 				});
 				return new HttpException(
 					{
-						message: 'خطا در ورود اطلاعات',
+						message: 'error while processing data',
 						status: HttpStatus.BAD_REQUEST,
 						properties: errorObject,
 						errors: errorStrings,

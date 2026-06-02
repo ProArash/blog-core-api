@@ -1,3 +1,5 @@
+// src/api/auth/auth.controller.ts
+
 import {
 	Body,
 	Controller,
@@ -10,10 +12,10 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignInDto } from './dto/signin-dto';
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
+import { UserPayload } from '@/utils/user.payload';
 import { AuthGuard } from '@nestjs/passport';
-import { UserPayload } from '../../utils/user.payload';
 
 @Controller('auth')
 export class AuthController {
@@ -22,52 +24,33 @@ export class AuthController {
 		private configService: ConfigService,
 	) {}
 
-	@Post('signIn')
+	@Post('sign-in')
 	async signIn(
 		@Body(new ValidationPipe()) signInDto: SignInDto,
 		@Res({ passthrough: true }) res: Response,
 	) {
-		const auth = await this.authService.signIn(signInDto);
+		const tokens = await this.authService.signIn(signInDto);
+		const isLocal = this.configService.get<string>('ENV') === 'dev';
+		const domain = isLocal
+			? 'localhost'
+			: (this.configService.get<string>('DOMAIN') ?? '');
 
-		const isLocal = this.configService.get<string>('ENV') == 'dev';
-
-		res.cookie('access_token', auth.access_token);
-		res.cookie('refresh_token', auth.refresh_token, {
+		res.cookie('access_token', tokens.access_token, {
 			path: '/',
-			domain: isLocal
-				? 'localhost'
-				: (this.configService.get<string>('DOMAIN') ?? ''),
+			domain,
 			httpOnly: true,
-			secure: isLocal ? false : true,
+			secure: !isLocal,
+		});
+
+		res.cookie('refresh_token', tokens.refresh_token, {
+			path: '/',
+			domain,
+			httpOnly: true,
+			secure: !isLocal,
 			maxAge: 1000 * 60 * 60 * 24 * 90,
 		});
-		return {
-			message: 'با موفقیت وارد شدید',
-		};
-	}
 
-	@Post('registerUser')
-	async registerUser(
-		@Body(new ValidationPipe()) signInDto: SignInDto,
-		@Res({ passthrough: true }) res: Response,
-	) {
-		const auth = await this.authService.registerUser(signInDto);
-
-		const isLocal = this.configService.get<string>('ENV') == 'dev';
-
-		res.cookie('access_token', auth.access_token);
-		res.cookie('refresh_token', auth.refresh_token, {
-			path: '/',
-			domain: isLocal
-				? 'localhost'
-				: (this.configService.get<string>('DOMAIN') ?? ''),
-			httpOnly: true,
-			secure: isLocal ? false : true,
-			maxAge: 1000 * 60 * 60 * 24 * 90,
-		});
-		return {
-			message: 'با موفقیت وارد شدید',
-		};
+		return { message: 'Logged in.' };
 	}
 
 	@UseGuards(AuthGuard('jwt'))
@@ -78,23 +61,16 @@ export class AuthController {
 	}
 
 	@UseGuards(AuthGuard('jwt'))
-	@Post('logOut')
+	@Post('log-out')
 	logOut(@Res({ passthrough: true }) res: Response) {
-		const isLocal = this.configService.get<string>('ENV') == 'dev';
-		res.clearCookie('refresh_token', {
-			path: '/',
-			domain: isLocal
-				? 'localhost'
-				: (this.configService.get<string>('DOMAIN') ?? ''),
-		});
-		res.clearCookie('access_token', {
-			path: '/',
-			domain: isLocal
-				? 'localhost'
-				: (this.configService.get<string>('DOMAIN') ?? ''),
-		});
-		return {
-			message: 'با موفقیت خارج شدید',
-		};
+		const isLocal = this.configService.get<string>('ENV') === 'dev';
+		const domain = isLocal
+			? 'localhost'
+			: (this.configService.get<string>('DOMAIN') ?? '');
+
+		res.clearCookie('access_token', { path: '/', domain });
+		res.clearCookie('refresh_token', { path: '/', domain });
+
+		return { message: 'Logged out successfully' };
 	}
 }

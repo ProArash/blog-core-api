@@ -19,13 +19,13 @@ export class UserService {
 	async newUser(createUserDto: CreateUserDto) {
 		const user = await this.userRepo.findOne({
 			where: {
-				mobile: createUserDto.mobile,
+				username: createUserDto.mobile,
 			},
 		});
 		if (user) throw new ConflictException('این شماره موبایل قبلا ثبت شده است');
 		return await this.userRepo
 			.create({
-				mobile: createUserDto.mobile,
+				username: createUserDto.mobile,
 				name: createUserDto.name,
 				password: await hash(createUserDto.password, 10),
 				plainPassword: createUserDto.password,
@@ -39,7 +39,7 @@ export class UserService {
 		if (!users || users.length == 0)
 			return await this.userRepo
 				.create({
-					mobile,
+					username: mobile,
 					password: await hash(password, 10),
 					plainPassword: password,
 					roles: [UserRole.ADMIN, UserRole.USER],
@@ -66,17 +66,17 @@ export class UserService {
 		return user;
 	}
 
-	async getUserByMobile(mobile: string) {
+	async getUserByMobile(username: string) {
 		const user = await this.userRepo.findOne({
 			where: {
-				mobile,
+				username,
 			},
 			select: {
 				id: true,
 				name: true,
 				password: true,
 				roles: true,
-				mobile: true,
+				username: true,
 			},
 		});
 		if (!user) throw new NotFoundException('کاربر یافت نشد');

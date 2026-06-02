@@ -6,9 +6,9 @@ import { AuthModule } from './api/auth/auth.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { UserService } from './api/user/user.service';
-import { ProductModule } from './api/product/product.module';
-import { CartModule } from './api/cart/cart.module';
-import { OrderModule } from './api/order/order.module';
+import { BlogModule } from './api/blog/blog.module';
+import { MediaModule } from './api/media/media.module';
+import { ContentModule } from './api/content/content.module';
 
 @Module({
 	imports: [
@@ -32,9 +32,9 @@ import { OrderModule } from './api/order/order.module';
 		}),
 		UserModule,
 		AuthModule,
-		ProductModule,
-		CartModule,
-		OrderModule,
+		BlogModule,
+		MediaModule,
+		ContentModule,
 	],
 })
 export class AppModule implements OnApplicationBootstrap {
@@ -44,6 +44,7 @@ export class AppModule implements OnApplicationBootstrap {
 	) {}
 	async onApplicationBootstrap() {
 		const info = this.configService.get<string>('ADMIN') || '';
+
 		if (info) {
 			const [mobile, password] = info.split(':');
 			await this.userService.createAdmin(mobile, password);

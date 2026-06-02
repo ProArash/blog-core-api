@@ -14,11 +14,11 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../auth/roles.decorator';
+import { RolesGuard } from '@/api/auth/roles.guard';
 import { UserRole } from './entities/user.entity';
-import { Request } from 'express';
-import { UserPayload } from '../../utils/user.payload';
+import type { Request } from 'express';
+import { UserPayload } from '@/utils/user.payload';
+import { Roles } from '@/api/auth/roles.decorator';
 
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller('user')
