@@ -1,6 +1,4 @@
-// src/api/auth/jwt.strategy.ts
-
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
@@ -24,7 +22,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 			]),
 			secretOrKey: configService.get<string>('SECRET', 'secret'),
 			passReqToCallback: true,
-			ignoreExpiration: true, // Handle expiration manually
+			ignoreExpiration: true,
 		});
 	}
 
@@ -36,19 +34,22 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 			: (this.configService.get<string>('DOMAIN') ?? '');
 
 		try {
-			// Verify access token is not expired
 			await this.jwtService.verifyAsync(cookies.access_token);
 		} catch (error) {
 			if (error instanceof TokenExpiredError) {
-				// Access token expired, try refresh token
 				if (!cookies.refresh_token) {
-					throw error;
+					throw new UnauthorizedException('Access token expired');
 				}
 
-				// This will throw if refresh token is also expired
-				await this.jwtService.verifyAsync(cookies.refresh_token);
+				try {
+					await this.jwtService.verifyAsync(cookies.refresh_token);
+				} catch (refreshError) {
+					if (refreshError instanceof TokenExpiredError) {
+						throw new UnauthorizedException('Refresh token expired');
+					}
+					throw new UnauthorizedException('Invalid refresh token');
+				}
 
-				// Generate new access token
 				const newPayload: UserPayload = {
 					id: payload.id,
 					name: payload.name,
@@ -67,7 +68,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
 				return newPayload;
 			}
-			throw error;
+			throw new UnauthorizedException('Invalid access token');
 		}
 
 		return {

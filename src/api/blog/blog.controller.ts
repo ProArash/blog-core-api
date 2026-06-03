@@ -7,9 +7,11 @@ import {
 	ParseIntPipe,
 	Patch,
 	Post,
+	Query,
 	Req,
 	UseGuards,
 } from '@nestjs/common';
+import { ApiQuery } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import type { Request } from 'express';
 import { BlogService } from './blog.service';
@@ -31,8 +33,10 @@ export class BlogController {
 	}
 
 	@Get()
-	findAll() {
-		return this.blogService.findAll();
+	@ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+	@ApiQuery({ name: 'pageSize', required: false, type: Number, example: 5 })
+	findAll(@Query('page') page?: number, @Query('pageSize') pageSize?: number) {
+		return this.blogService.findAll(page, pageSize);
 	}
 
 	@Get('slug/:slug')
