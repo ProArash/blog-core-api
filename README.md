@@ -42,7 +42,7 @@ Backend API for blog content management, media handling, and support chat.
 
 - [x] API documentation
 - [x] Request validation
-- [] Error handling middleware
+- [ ] Error handling middleware
 - [ ] Logging and monitoring
 - [ ] Unit and integration tests
 - [x] Docker setup
