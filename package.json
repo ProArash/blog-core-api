@@ -18,7 +18,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "migrate": "npm run build && typeorm migration:run -d ./dist/utils/data-source.js"
+    "migrate": "typeorm migration:run -d ./dist/utils/data-source.js"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.24",
@@ -36,6 +36,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
     "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.2",
     "mysql2": "^3.22.4",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
@@ -61,7 +62,6 @@
     "@types/node": "^25.9.1",
     "@types/passport-jwt": "^4.0.1",
     "@types/supertest": "^7.2.0",
-    "dotenv": "^17.4.2",
     "eslint": "^10.4.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.6",

@@ -23,11 +23,11 @@ import { ContentModule } from './api/content/content.module';
 			imports: [ConfigModule],
 			inject: [ConfigService],
 			useFactory: (configService: ConfigService) => ({
-				type: 'mariadb',
+				type: 'mysql',
 				url: configService.get<string>('DB_URL'),
 				autoLoadEntities: true,
 				synchronize: false,
-				migrationsRun: true,
+				migrationsRun: false,
 			}),
 		}),
 		UserModule,
